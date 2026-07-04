@@ -121,7 +121,7 @@ export default async function AdminPage() {
           <section className="bg-white rounded-2xl border border-gray-100 p-5">
             <h2 className="font-bold text-gray-900 mb-4">최근 가입자</h2>
             <div className="space-y-2">
-              {stats.recentUsers.map((u) => (
+              {stats.recentUsers.map((u: any) => (
                 <div key={u.id} className="flex items-center justify-between text-sm">
                   <span className="font-medium">{u.nickname ?? u.email}</span>
                   <span className="text-xs text-gray-400">

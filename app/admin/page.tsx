@@ -93,7 +93,7 @@ export default async function AdminPage() {
               <p className="text-sm text-gray-400">신고된 게시글이 없습니다.</p>
             ) : (
               <div className="space-y-3">
-                {stats.reportedPosts.map((p) => (
+                {stats.reportedPosts.map((p: any) => (
                   <div key={p.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex-1 min-w-0 mr-3">
                       <Link href={`/community/${p.id}`} className="text-sm font-medium hover:text-green-800 line-clamp-1">

@@ -73,7 +73,7 @@ export default async function AdminPage() {
               <p className="text-sm text-gray-400">대기 중인 인증이 없습니다.</p>
             ) : (
               <div className="space-y-3">
-                {stats.pendingVerifs.map((v) => (
+                {stats.pendingVerifs.map((v: any) => (
                   <div key={v.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
                       <p className="text-sm font-medium">{v.user.nickname ?? v.user.email}</p>

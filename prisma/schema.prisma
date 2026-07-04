@@ -1,0 +1,257 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  nickname      String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  provider      String?
+  role          Role      @default(USER)
+  verifyLevel   VerifyLevel @default(NONE)
+  isVerified    Boolean   @default(false)
+  isBanned      Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  posts         Post[]
+  comments      Comment[]
+  reports       Report[]
+  verifications Verification[]
+  notifications Notification[]
+  brandSubs     BrandSubscription[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Brand {
+  id                 String    @id @default(cuid())
+  slug               String    @unique
+  name               String
+  nameEn             String?
+  category           String
+  subcategory        String?
+  description        String?   @db.Text
+  logoUrl            String?
+  franchiseStartDate DateTime?
+  storeCount         Int?
+  directStoreCount   Int?
+  avgRevenue         BigInt?
+  franchiseFee       BigInt?
+  deposit            BigInt?
+  interiorCost       BigInt?
+  educationFee       BigInt?
+  contractPeriod     Int?
+  adFee              Float?
+  royaltyFee         Float?
+  dataUpdatedAt      DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  posts         Post[]
+  subscriptions BrandSubscription[]
+  storeHistory  BrandStoreHistory[]
+}
+
+model BrandStoreHistory {
+  id          String   @id @default(cuid())
+  brandId     String
+  year        Int
+  newCount    Int      @default(0)
+  closedCount Int      @default(0)
+  totalCount  Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@unique([brandId, year])
+}
+
+model BrandSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  brandId   String
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, brandId])
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  title       String
+  content     String    @db.Text
+  authorId    String
+  brandId     String?
+  boardType   BoardType @default(FREE)
+  isAnonymous Boolean   @default(false)
+  isBlinded   Boolean   @default(false)
+  isPinned    Boolean   @default(false)
+  viewCount   Int       @default(0)
+  likeCount   Int       @default(0)
+  reportCount Int       @default(0)
+  images      String[]
+  lastIpHash  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  brand    Brand?    @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  comments Comment[]
+  reports  Report[]
+}
+
+model Comment {
+  id          String   @id @default(cuid())
+  content     String   @db.Text
+  authorId    String
+  postId      String
+  parentId    String?
+  isAnonymous Boolean  @default(false)
+  isBlinded   Boolean  @default(false)
+  reportCount Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author  User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post    Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies Comment[] @relation("CommentReplies")
+  reports Report[]
+}
+
+model Report {
+  id         String       @id @default(cuid())
+  targetType ReportTarget
+  targetId   String
+  reason     String
+  reporterId String
+  postId     String?
+  commentId  String?
+  status     ReportStatus @default(PENDING)
+  createdAt  DateTime     @default(now())
+
+  reporter User     @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  post     Post?    @relation(fields: [postId], references: [id], onDelete: SetNull)
+  comment  Comment? @relation(fields: [commentId], references: [id], onDelete: SetNull)
+}
+
+model Verification {
+  id          String             @id @default(cuid())
+  userId      String
+  type        VerificationType
+  documentUrl String?
+  brandName   String?
+  status      VerificationStatus @default(PENDING)
+  note        String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  message   String
+  link      String?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum VerifyLevel {
+  NONE
+  SELF
+  VERIFIED
+}
+
+enum BoardType {
+  NOTICE
+  QNA
+  REVIEW
+  FREE
+  REPORT_ABUSE
+  TRADE
+}
+
+enum ReportTarget {
+  POST
+  COMMENT
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  DISMISSED
+}
+
+enum VerificationType {
+  SELF
+  DOCUMENT
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum NotificationType {
+  COMMENT
+  REPLY
+  BRAND_NEW_POST
+  VERIFY_APPROVED
+  VERIFY_REJECTED
+  SYSTEM
+}

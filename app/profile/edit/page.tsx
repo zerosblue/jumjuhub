@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Header from "@/components/Header";
+import { upload } from "@vercel/blob/client";
 
 export default function ProfileEditPage() {
   const { data: session } = useSession();
@@ -19,8 +20,8 @@ export default function ProfileEditPage() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      setError("이미지는 5MB 이하여야 합니다.");
+    if (file.size > 20 * 1024 * 1024) {
+      setError("이미지는 20MB 이하여야 합니다.");
       return;
     }
     setImageFile(file);
@@ -37,17 +38,18 @@ export default function ProfileEditPage() {
       let imageUrl: string | undefined;
 
       if (imageFile) {
-        const formData = new FormData();
-        formData.append("files", imageFile);
-        const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
-        if (!uploadRes.ok) {
-          const d = await uploadRes.json();
-          setError(d.error ?? "이미지 업로드 실패");
+        try {
+          const blob = await upload(
+            `profiles/${Date.now()}-${imageFile.name}`,
+            imageFile,
+            { access: "public", handleUploadUrl: "/api/upload" }
+          );
+          imageUrl = blob.url;
+        } catch (err) {
+          setError((err as Error).message || "이미지 업로드 실패");
           setLoading(false);
           return;
         }
-        const { urls } = await uploadRes.json();
-        imageUrl = urls[0];
       }
 
       const body: Record<string, string> = {};
@@ -109,7 +111,7 @@ export default function ProfileEditPage() {
                 </svg>
               </div>
             </button>
-            <p className="text-xs text-gray-400">클릭해서 사진 변경 (최대 5MB)</p>
+            <p className="text-xs text-gray-400">클릭해서 사진 변경 (최대 20MB)</p>
             <input
               ref={fileInputRef}
               type="file"

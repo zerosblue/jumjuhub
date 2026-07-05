@@ -1,15 +1,122 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Header from "@/components/Header";
 import { boardTypeLabel } from "@/lib/utils";
-import { Upload, X } from "lucide-react";
+import { Upload, X, Search } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 
 const ALL_BOARDS = ["NOTICE", "QNA", "REVIEW", "FREE", "REPORT_ABUSE", "TRADE"] as const;
 type BoardType = typeof ALL_BOARDS[number];
+
+interface BrandOption {
+  id: string;
+  name: string;
+  category: string;
+}
+
+function BrandSearch({
+  initialBrandId,
+  initialBrandName,
+  onChange,
+}: {
+  initialBrandId: string;
+  initialBrandName: string;
+  onChange: (id: string) => void;
+}) {
+  const [query, setQuery] = useState(initialBrandName);
+  const [results, setResults] = useState<BrandOption[]>([]);
+  const [open, setOpen] = useState(false);
+  const [selectedName, setSelectedName] = useState(initialBrandName);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const search = async (q: string) => {
+    if (!q.trim()) { setResults([]); return; }
+    try {
+      const res = await fetch(`/api/brands?q=${encodeURIComponent(q)}&limit=8`);
+      const data = await res.json();
+      setResults(data.brands ?? []);
+    } catch {
+      setResults([]);
+    }
+  };
+
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value;
+    setQuery(v);
+    setSelectedName("");
+    onChange("");
+    setOpen(true);
+    search(v);
+  };
+
+  const select = (brand: BrandOption) => {
+    setQuery(brand.name);
+    setSelectedName(brand.name);
+    onChange(brand.id);
+    setOpen(false);
+    setResults([]);
+  };
+
+  const clear = () => {
+    setQuery("");
+    setSelectedName("");
+    onChange("");
+    setResults([]);
+  };
+
+  return (
+    <div ref={ref} className="relative">
+      <div className="relative">
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <input
+          type="text"
+          value={query}
+          onChange={handleInput}
+          onFocus={() => { if (query && !selectedName) setOpen(true); }}
+          placeholder="브랜드명 검색 (선택사항)"
+          className={`w-full border rounded-xl pl-8 pr-8 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 ${
+            selectedName ? "border-green-400 bg-green-50" : "border-gray-200"
+          }`}
+        />
+        {query && (
+          <button type="button" onClick={clear} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+            <X size={14} />
+          </button>
+        )}
+      </div>
+      {selectedName && (
+        <p className="text-xs text-green-700 mt-1">✓ {selectedName} 선택됨</p>
+      )}
+      {open && results.length > 0 && (
+        <ul className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+          {results.map((b) => (
+            <li key={b.id}>
+              <button
+                type="button"
+                onClick={() => select(b)}
+                className="w-full text-left px-4 py-2.5 text-sm hover:bg-green-50 flex items-center justify-between gap-2"
+              >
+                <span className="font-medium text-gray-900 truncate">{b.name}</span>
+                <span className="text-xs text-gray-400 shrink-0">{b.category}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 export default function WritePostContent() {
   const { data: session, status } = useSession();
@@ -20,11 +127,13 @@ export default function WritePostContent() {
   const BOARDS = isAdmin ? ALL_BOARDS : ALL_BOARDS.filter((b) => b !== "NOTICE");
 
   const defaultBoard = (searchParams.get("board") ?? "FREE") as BoardType;
-  const brandId = searchParams.get("brandId") ?? "";
+  const initialBrandId = searchParams.get("brandId") ?? "";
+  const initialBrandName = searchParams.get("brandName") ?? "";
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [boardType, setBoardType] = useState<BoardType>(defaultBoard);
+  const [brandId, setBrandId] = useState(initialBrandId);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -135,6 +244,18 @@ export default function WritePostContent() {
                 );
               })}
             </div>
+          </div>
+
+          {/* 관련 브랜드 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              관련 브랜드 <span className="text-gray-400 font-normal">(선택)</span>
+            </label>
+            <BrandSearch
+              initialBrandId={initialBrandId}
+              initialBrandName={initialBrandName}
+              onChange={setBrandId}
+            />
           </div>
 
           {/* 제목 */}

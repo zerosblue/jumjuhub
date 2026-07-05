@@ -10,7 +10,7 @@ const createSchema = z.object({
   brandId: z.string().optional(),
   boardType: z.enum(["NOTICE", "QNA", "REVIEW", "FREE", "REPORT_ABUSE", "TRADE"]),
   isAnonymous: z.boolean().default(false),
-  images: z.array(z.string().url()).max(5).default([]),
+  images: z.array(z.string().min(1)).max(5).default([]),
 });
 
 export async function GET(req: NextRequest) {
@@ -69,7 +69,9 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const parsed = createSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+    const fieldErrors = parsed.error.flatten().fieldErrors;
+    const firstMsg = Object.values(fieldErrors).flat()[0] ?? "입력값을 확인해 주세요.";
+    return NextResponse.json({ error: firstMsg }, { status: 400 });
   }
 
   const { title, content, brandId, boardType, isAnonymous, images } = parsed.data;

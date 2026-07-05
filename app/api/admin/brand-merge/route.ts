@@ -29,9 +29,9 @@ export async function POST(req: NextRequest) {
     const enName = extractEnglishName(src.name);
     if (!enName) continue;
 
-    // 영문명과 일치하는 브랜드 찾기
+    // 영문명과 일치하는 브랜드 찾기 (대소문자 구분 없이)
     const target = await prisma.brand.findFirst({
-      where: { name: enName, id: { not: src.id } },
+      where: { name: { equals: enName, mode: "insensitive" }, id: { not: src.id } },
       include: { storeHistory: true },
     });
 

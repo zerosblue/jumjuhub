@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -173,6 +174,7 @@ function BanToggleButton({ userId, isBanned }: { userId: string; isBanned: boole
     <form action={async () => {
       "use server";
       await prisma.user.update({ where: { id: userId }, data: { isBanned: !isBanned } });
+      revalidatePath("/admin/users");
     }}>
       <button
         type="submit"

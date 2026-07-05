@@ -57,4 +57,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/auth/signin",
   },
+  debug: true,
+  events: {
+    async signIn(message) {
+      console.log("[auth] signIn", JSON.stringify(message));
+    },
+    async session(message) {
+      console.log("[auth] session", JSON.stringify(message));
+    },
+  },
 });

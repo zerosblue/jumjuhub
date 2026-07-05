@@ -105,35 +105,42 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const post = await prisma.post.create({
-    data: {
-      title,
-      content,
-      authorId: session.user.id,
-      brandId: brandId || null,
-      boardType: boardType as any,
-      isAnonymous,
-      images,
-      lastIpHash: ipHash,
-    },
-  });
+  let post;
+  try {
+    post = await prisma.post.create({
+      data: {
+        title,
+        content,
+        authorId: session.user.id,
+        brandId: brandId || null,
+        boardType: boardType as any,
+        isAnonymous,
+        images,
+        lastIpHash: ipHash,
+      },
+    });
+  } catch (err) {
+    console.error("[POST /api/posts] prisma.post.create error:", err);
+    return NextResponse.json({ error: "게시글 저장 중 오류가 발생했습니다." }, { status: 500 });
+  }
 
-  // 브랜드 구독자에게 알림
+  // 브랜드 구독자에게 알림 (실패해도 무시)
   if (brandId) {
-    const subs = await prisma.brandSubscription.findMany({
+    prisma.brandSubscription.findMany({
       where: { brandId, userId: { not: session.user.id } },
       select: { userId: true },
-    });
-    if (subs.length > 0) {
-      await prisma.notification.createMany({
-        data: subs.map((s) => ({
-          userId: s.userId,
-          type: "BRAND_NEW_POST" as const,
-          message: `관심 브랜드에 새 글이 등록되었습니다: ${title}`,
-          link: `/community/${post.id}`,
-        })),
-      });
-    }
+    }).then((subs) => {
+      if (subs.length > 0) {
+        prisma.notification.createMany({
+          data: subs.map((s) => ({
+            userId: s.userId,
+            type: "BRAND_NEW_POST" as const,
+            message: `관심 브랜드에 새 글이 등록되었습니다: ${title}`,
+            link: `/community/${post.id}`,
+          })),
+        }).catch(() => {});
+      }
+    }).catch(() => {});
   }
 
   return NextResponse.json(post, { status: 201 });

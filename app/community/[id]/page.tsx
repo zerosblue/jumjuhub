@@ -54,7 +54,8 @@ export default async function PostDetailPage({
   const post = await getPost(id);
   if (!post) notFound();
 
-  await prisma.post.update({ where: { id }, data: { viewCount: { increment: 1 } } });
+  // viewCount 증가 — 실패해도 페이지 렌더링은 계속
+  prisma.post.update({ where: { id }, data: { viewCount: { increment: 1 } } }).catch(() => {});
 
   const board = boardTypeLabel(post.boardType);
   const displayAuthor = post.isAnonymous ? null : post.author;

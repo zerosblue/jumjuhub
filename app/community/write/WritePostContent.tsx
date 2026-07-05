@@ -45,15 +45,22 @@ export default function WritePostContent() {
     }
 
     setUploading(true);
-    const formData = new FormData();
-    files.forEach((f) => formData.append("files", f));
+    try {
+      const formData = new FormData();
+      files.forEach((f) => formData.append("files", f));
 
-    const res = await fetch("/api/upload", { method: "POST", body: formData });
-    if (res.ok) {
-      const { urls } = await res.json();
-      setImages((prev) => [...prev, ...urls]);
-    } else {
-      setError("이미지 업로드에 실패했습니다.");
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      if (res.ok) {
+        const { urls } = await res.json();
+        setImages((prev) => [...prev, ...urls]);
+      } else {
+        const text = await res.text().catch(() => "");
+        let msg = "이미지 업로드에 실패했습니다.";
+        try { msg = JSON.parse(text).error ?? msg; } catch {}
+        setError(msg);
+      }
+    } catch {
+      setError("이미지 업로드 중 오류가 발생했습니다. 다시 시도해 주세요.");
     }
     setUploading(false);
   };
@@ -68,27 +75,34 @@ export default function WritePostContent() {
     }
 
     setSubmitting(true);
-    const res = await fetch("/api/posts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title,
-        content,
-        brandId: brandId || undefined,
-        boardType,
-        isAnonymous,
-        images,
-      }),
-    });
+    try {
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          content,
+          brandId: brandId || undefined,
+          boardType,
+          isAnonymous,
+          images,
+        }),
+      });
 
-    if (res.ok) {
-      const post = await res.json();
-      router.push(`/community/${post.id}`);
-    } else {
-      const data = await res.json();
-      setError(data.error ?? "게시글 작성에 실패했습니다.");
+      if (res.ok) {
+        const post = await res.json();
+        router.push(`/community/${post.id}`);
+      } else {
+        const text = await res.text().catch(() => "");
+        let msg = "게시글 작성에 실패했습니다.";
+        try { msg = JSON.parse(text).error ?? msg; } catch {}
+        setError(msg);
+        setSubmitting(false);
+      }
+    } catch {
+      setError("네트워크 오류가 발생했습니다. 다시 시도해 주세요.");
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
 
   return (

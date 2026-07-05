@@ -44,6 +44,13 @@ export default function WritePostContent() {
       return;
     }
 
+    const oversized = files.filter((f) => f.size > 5 * 1024 * 1024);
+    if (oversized.length > 0) {
+      setError(`파일 크기 초과: ${oversized.map((f) => f.name).join(", ")} (최대 5MB)`);
+      e.target.value = "";
+      return;
+    }
+
     setUploading(true);
     try {
       const formData = new FormData();

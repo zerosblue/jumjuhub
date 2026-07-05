@@ -14,8 +14,8 @@ const CATEGORIES = [
   { name: "분식", icon: "🍜", slug: "분식" },
   { name: "피자", icon: "🍕", slug: "피자" },
   { name: "한식", icon: "🍱", slug: "한식" },
-  { name: "버거", icon: "🍔", slug: "버거" },
-  { name: "디저트", icon: "🧁", slug: "디저트" },
+  { name: "버거", icon: "🍔", slug: "패스트푸드" },
+  { name: "디저트", icon: "🧁", slug: "제과제빵" },
 ];
 
 async function getHomeData() {

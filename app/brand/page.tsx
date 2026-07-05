@@ -4,7 +4,11 @@ import Header from "@/components/Header";
 import BrandCard from "@/components/BrandCard";
 import SearchBar from "@/components/SearchBar";
 
-const CATEGORIES = ["치킨", "커피", "한식", "분식", "피자", "제과제빵", "일식", "중식", "패스트푸드", "주점", "이미용", "교육 (외국어)"];
+const CATEGORIES = [
+  "치킨", "커피", "한식", "분식", "피자", "제과제빵",
+  "일식", "중식", "서양식", "패스트푸드", "주점",
+  "편의점", "이미용", "교육 (외국어)", "아이스크림/빙수",
+];
 
 type SortKey = "storeCount" | "avgRevenue" | "name";
 

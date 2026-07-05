@@ -63,12 +63,12 @@ function StoreHistoryChart({ history }: { history: { year: number; totalCount: n
   return (
     <div>
       {/* 총 가맹점 수 추이 */}
-      <div className="flex items-center gap-2 mb-4 overflow-x-auto">
+      <div className="flex items-center w-full mb-4 overflow-x-auto">
         {history.map((h, i) => {
           const prev = history[i - 1];
           const diff = prev ? h.totalCount - prev.totalCount : 0;
           return (
-            <div key={h.year} className="flex-1 min-w-[60px] text-center">
+            <div key={h.year} className="flex-1 text-center">
               <p className="text-xs font-bold text-gray-800">{h.totalCount.toLocaleString()}개</p>
               {diff !== 0 && (
                 <p className={`text-xs font-medium ${diff > 0 ? "text-green-600" : "text-red-500"}`}>
@@ -82,22 +82,22 @@ function StoreHistoryChart({ history }: { history: { year: number; totalCount: n
       </div>
 
       {/* 신규/폐점 바 차트 */}
-      <div className="flex items-end gap-4">
+      <div className="flex items-end w-full">
         {history.map((h) => (
-          <div key={h.year} className="flex flex-col items-center gap-1" style={{ width: 48 }}>
+          <div key={h.year} className="flex-1 flex flex-col items-center gap-1">
             <div className="flex items-end gap-1" style={{ height: `${BAR_H}px` }}>
-              <div className="flex flex-col justify-end items-center" style={{ width: 18 }}>
+              <div className="flex flex-col justify-end items-center" style={{ width: 14 }}>
                 <span className="text-xs text-green-700 font-bold mb-0.5" style={{ fontSize: 10 }}>{h.newCount}</span>
                 <div
                   className="bg-green-500 rounded-t"
-                  style={{ width: 18, height: `${(h.newCount / maxBar) * (BAR_H - 20)}px`, minHeight: h.newCount ? 4 : 0 }}
+                  style={{ width: 14, height: `${(h.newCount / maxBar) * (BAR_H - 20)}px`, minHeight: h.newCount ? 4 : 0 }}
                 />
               </div>
-              <div className="flex flex-col justify-end items-center" style={{ width: 18 }}>
+              <div className="flex flex-col justify-end items-center" style={{ width: 14 }}>
                 <span className="text-xs text-red-500 font-bold mb-0.5" style={{ fontSize: 10 }}>{h.closedCount}</span>
                 <div
                   className="bg-red-400 rounded-t"
-                  style={{ width: 18, height: `${(h.closedCount / maxBar) * (BAR_H - 20)}px`, minHeight: h.closedCount ? 4 : 0 }}
+                  style={{ width: 14, height: `${(h.closedCount / maxBar) * (BAR_H - 20)}px`, minHeight: h.closedCount ? 4 : 0 }}
                 />
               </div>
             </div>

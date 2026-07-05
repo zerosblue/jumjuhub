@@ -88,6 +88,7 @@ const DOMAIN_MAP: Record<string, string> = {
   "미스터피자": "mrpizza.co.kr",
   "피자알볼로": "pizzaalbolo.com",
   "피자나라치킨공주": "pizzanara.co.kr",
+  "피나치공": "pizzanara.co.kr",
   "청년피자": "chungnyon.co.kr",
   // 패밀리레스토랑·뷔페
   "아웃백": "outback.co.kr",

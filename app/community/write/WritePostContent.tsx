@@ -44,13 +44,6 @@ export default function WritePostContent() {
       return;
     }
 
-    const oversized = files.filter((f) => f.size > 5 * 1024 * 1024);
-    if (oversized.length > 0) {
-      setError(`파일 크기 초과: ${oversized.map((f) => f.name).join(", ")} (최대 5MB)`);
-      e.target.value = "";
-      return;
-    }
-
     setUploading(true);
     try {
       const formData = new FormData();
@@ -177,7 +170,7 @@ export default function WritePostContent() {
 
           {/* 이미지 업로드 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">이미지 (최대 5장, 장당 5MB)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">이미지 (최대 5장)</label>
             <div className="flex flex-wrap gap-2">
               {images.map((url, i) => (
                 <div key={i} className="relative w-24 h-24">

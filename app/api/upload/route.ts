@@ -21,10 +21,6 @@ export async function POST(req: NextRequest) {
   const urls: string[] = [];
 
   for (const file of files) {
-    if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json({ error: "파일 크기는 5MB 이하여야 합니다." }, { status: 400 });
-    }
-
     const ext = file.name.split(".").pop() ?? "jpg";
     const filename = `uploads/${session.user.id}-${Date.now()}.${ext}`;
 

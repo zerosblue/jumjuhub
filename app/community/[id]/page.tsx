@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import CommentSection from "@/components/CommentSection";
 import { formatDate, boardTypeLabel } from "@/lib/utils";
 import { Shield, Eye, ArrowLeft } from "lucide-react";
+import PostActions from "@/components/PostActions";
 
 async function getPost(id: string) {
   try {
@@ -112,7 +113,10 @@ export default async function PostDetailPage({
             )}
           </div>
 
-          <h1 className="text-xl font-black text-gray-900 mb-4 leading-snug">{post.title}</h1>
+          <div className="flex items-start justify-between gap-2 mb-4">
+            <h1 className="text-xl font-black text-gray-900 leading-snug">{post.title}</h1>
+            <PostActions postId={post.id} authorId={post.author?.id ?? ""} />
+          </div>
 
           {/* 작성자 정보 */}
           <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">

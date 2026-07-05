@@ -168,7 +168,7 @@ export default async function BrandDetailPage({
           </div>
 
           {/* 핵심 지표 (배너 하단) */}
-          <div className="grid grid-cols-4 gap-3 mt-6 pt-5 border-t border-white/20">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6 pt-5 border-t border-white/20">
             <div className="text-center">
               <p className="text-green-300 text-xs mb-1">가맹점 수</p>
               <p className="text-white font-black text-lg">
@@ -179,6 +179,12 @@ export default async function BrandDetailPage({
               <p className="text-green-300 text-xs mb-1">연 평균매출</p>
               <p className="text-amber-300 font-black text-lg">
                 {brand.avgRevenue ? formatCurrency(brand.avgRevenue) : "-"}
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-green-300 text-xs mb-1">창업비용</p>
+              <p className="text-amber-200 font-black text-lg">
+                {totalCost > 0 ? formatCurrency(totalCost) : "-"}
               </p>
             </div>
             <div className="text-center">

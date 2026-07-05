@@ -7,6 +7,7 @@ import CommentSection from "@/components/CommentSection";
 import { formatDate, boardTypeLabel } from "@/lib/utils";
 import { Shield, Eye, ArrowLeft } from "lucide-react";
 import PostActions from "@/components/PostActions";
+import LikeButton from "@/components/LikeButton";
 
 async function getPost(id: string) {
   try {
@@ -180,6 +181,11 @@ export default async function PostDetailPage({
               )}
             </>
           )}
+
+          {/* 좋아요 */}
+          <div className="flex justify-center mt-8 pt-6 border-t border-gray-100">
+            <LikeButton postId={post.id} initialCount={post.likeCount} />
+          </div>
         </article>
 
         {/* 댓글 */}

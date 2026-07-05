@@ -84,7 +84,7 @@ function BrandSearch({
           value={query}
           onChange={handleInput}
           onFocus={() => { if (query && !selectedName) setOpen(true); }}
-          placeholder="브랜드명 검색 (선택사항)"
+          placeholder="브랜드명 검색"
           className={`w-full border rounded-xl pl-8 pr-8 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 ${
             selectedName ? "border-green-400 bg-green-50" : "border-gray-200"
           }`}

@@ -30,7 +30,7 @@ async function getBrands(q: string, category: string, page: number, sort: SortKe
     sort === "name"
       ? { name: "asc" as const }
       : sort === "avgRevenue"
-      ? { avgRevenue: "desc" as const }
+      ? ({ avgRevenue: { sort: "desc", nulls: "last" } } as any)
       : { storeCount: "desc" as const };
 
   const limit = 24;

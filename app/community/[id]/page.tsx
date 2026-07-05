@@ -8,27 +8,32 @@ import { formatDate, boardTypeLabel } from "@/lib/utils";
 import { Shield, Eye, ArrowLeft } from "lucide-react";
 
 async function getPost(id: string) {
-  const post = await prisma.post.findUnique({
-    where: { id },
-    include: {
-      author: { select: { id: true, nickname: true, image: true, verifyLevel: true } },
-      brand: { select: { id: true, name: true, slug: true } },
-      comments: {
-        where: { parentId: null },
-        orderBy: { createdAt: "asc" },
-        include: {
-          author: { select: { id: true, nickname: true, image: true, verifyLevel: true } },
-          replies: {
-            orderBy: { createdAt: "asc" },
-            include: {
-              author: { select: { id: true, nickname: true, image: true, verifyLevel: true } },
+  try {
+    const post = await prisma.post.findUnique({
+      where: { id },
+      include: {
+        author: { select: { id: true, nickname: true, image: true, verifyLevel: true } },
+        brand: { select: { id: true, name: true, slug: true } },
+        comments: {
+          where: { parentId: null },
+          orderBy: { createdAt: "asc" },
+          include: {
+            author: { select: { id: true, nickname: true, image: true, verifyLevel: true } },
+            replies: {
+              orderBy: { createdAt: "asc" },
+              include: {
+                author: { select: { id: true, nickname: true, image: true, verifyLevel: true } },
+              },
             },
           },
         },
       },
-    },
-  });
-  return post;
+    });
+    return post;
+  } catch (err) {
+    console.error("[getPost] Prisma error:", err);
+    throw err;
+  }
 }
 
 export async function generateMetadata({
@@ -36,13 +41,17 @@ export async function generateMetadata({
 }: {
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
-  const { id } = await params;
-  const post = await prisma.post.findUnique({ where: { id }, select: { title: true, content: true } });
-  if (!post) return {};
-  return {
-    title: post.title,
-    description: post.content.slice(0, 150),
-  };
+  try {
+    const { id } = await params;
+    const post = await prisma.post.findUnique({ where: { id }, select: { title: true, content: true } });
+    if (!post) return {};
+    return {
+      title: post.title,
+      description: post.content.slice(0, 150),
+    };
+  } catch {
+    return {};
+  }
 }
 
 export default async function PostDetailPage({

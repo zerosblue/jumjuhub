@@ -22,7 +22,8 @@ async function getHomeData() {
   try {
     const [topBrands, recentPosts, lastSync] = await Promise.all([
       prisma.brand.findMany({
-        orderBy: { storeCount: "desc" },
+        orderBy: { avgRevenue: "desc" },
+        where: { avgRevenue: { not: null } },
         take: 10,
         select: {
           id: true,

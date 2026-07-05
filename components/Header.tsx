@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell, Menu, X, ChevronDown, LogOut, User, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -10,6 +10,15 @@ export default function Header() {
   const { data: session } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!session?.user) return;
+    fetch("/api/notifications")
+      .then((r) => r.json())
+      .then((data: any[]) => setUnreadCount(data.filter((n) => !n.isRead).length))
+      .catch(() => {});
+  }, [session?.user]);
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
@@ -35,6 +44,11 @@ export default function Header() {
               <>
                 <Link href="/notifications" className="relative p-2 text-gray-500 hover:text-green-800">
                   <Bell size={20} />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold leading-none">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
                 </Link>
                 <div className="relative">
                   <button

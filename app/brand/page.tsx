@@ -30,6 +30,7 @@ async function getBrands(q: string, category: string, page: number) {
         slug: true,
         name: true,
         category: true,
+        logoUrl: true,
         storeCount: true,
         avgRevenue: true,
         franchiseFee: true,

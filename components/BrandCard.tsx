@@ -7,6 +7,7 @@ interface BrandCardProps {
     slug: string;
     name: string;
     category: string;
+    logoUrl?: string | null;
     storeCount: number | null;
     avgRevenue: string | null;
     franchiseFee: string | null;
@@ -29,6 +30,13 @@ export default function BrandCard({ brand, rank }: BrandCardProps) {
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
+            {brand.logoUrl ? (
+              <img src={brand.logoUrl} alt="" className="w-5 h-5 rounded object-contain" />
+            ) : (
+              <div className="w-5 h-5 rounded bg-green-800 flex items-center justify-center text-white text-xs font-black shrink-0">
+                {brand.name[0]}
+              </div>
+            )}
             <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-medium">
               {brand.category}
             </span>

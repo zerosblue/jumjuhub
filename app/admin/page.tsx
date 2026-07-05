@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Header from "@/components/Header";
 import SyncButton from "@/components/admin/SyncButton";
+import BrandToolsButton from "@/components/admin/BrandToolsButton";
 
 async function getAdminStats() {
   const [userCount, postCount, pendingReports, pendingVerifications, brandCount] =
@@ -113,6 +114,12 @@ export default async function AdminPage() {
           <section className="bg-white rounded-2xl border border-gray-100 p-5">
             <h2 className="font-bold text-gray-900 mb-4">공정위 데이터 관리</h2>
             <SyncButton initialCount={stats.brandCount} />
+          </section>
+
+          {/* 브랜드 데이터 정리 */}
+          <section className="bg-white rounded-2xl border border-gray-100 p-5">
+            <h2 className="font-bold text-gray-900 mb-4">브랜드 데이터 정리</h2>
+            <BrandToolsButton />
           </section>
 
           {/* 최근 가입자 */}

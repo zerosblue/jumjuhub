@@ -77,6 +77,7 @@ export default function EditPostPage() {
         body: JSON.stringify({ title, content, images }),
       });
       if (res.ok) {
+        router.refresh();
         router.push(`/community/${id}`);
       } else {
         const data = await res.json().catch(() => ({}));

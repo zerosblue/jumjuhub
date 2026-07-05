@@ -85,7 +85,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="font-bold text-gray-900 mb-2">8. 개인정보 보호책임자</h2>
             <div className="bg-gray-50 rounded-xl p-4 text-gray-600">
-              <p>이메일: <a href="mailto:admin@jumjuhub.com" className="text-green-700 underline">admin@jumjuhub.com</a></p>
+              <p>이메일: <a href="mailto:zerosblue7717@gmail.com" className="text-green-700 underline">zerosblue7717@gmail.com</a></p>
             </div>
           </section>
 

@@ -200,8 +200,8 @@ export default async function HomePage() {
           <div className="flex justify-center gap-4 mt-2">
             <Link href="/terms" className="hover:text-gray-600">이용약관</Link>
             <Link href="/privacy" className="hover:text-gray-600">개인정보처리방침</Link>
-            <a href="mailto:admin@jumjuhub.com" className="hover:text-gray-600">문의하기</a>
-            <a href="mailto:ad@jumjuhub.com" className="hover:text-gray-600">광고문의</a>
+            <a href="mailto:zerosblue7717@gmail.com" className="hover:text-gray-600">문의하기</a>
+            <a href="mailto:admin@jumjuhub.com" className="hover:text-gray-600">광고문의</a>
           </div>
         </div>
       </footer>

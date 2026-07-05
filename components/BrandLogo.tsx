@@ -36,7 +36,6 @@ const DOMAIN_MAP: Record<string, string> = {
   "노브랜드버거": "nobrand-burger.com",
   "파리바게뜨": "paris.co.kr",
   "뚜레쥬르": "tlj.co.kr",
-  "뚜레쥬르": "tlj.co.kr",
   "던킨": "dunkindonuts.co.kr",
   "배스킨라빈스": "baskinrobbins.co.kr",
   "요거트월드": "yogurtworld.co.kr",

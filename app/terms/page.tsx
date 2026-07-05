@@ -34,7 +34,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="font-bold text-gray-900 mb-2">제4조 (회원 가입 및 탈퇴)</h2>
-            <p>회원 가입은 소셜 로그인(Google, Kakao)을 통해 진행됩니다. 회원 탈퇴를 원하시면 admin@jumjuhub.com으로 요청해 주시면 처리됩니다.</p>
+            <p>회원 가입은 소셜 로그인(Google, Kakao)을 통해 진행됩니다. 회원 탈퇴를 원하시면 zerosblue7717@gmail.com으로 요청해 주시면 처리됩니다.</p>
           </section>
 
           <section>
@@ -65,7 +65,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="font-bold text-gray-900 mb-2">문의</h2>
-            <p>이용약관에 관한 문의는 <a href="mailto:admin@jumjuhub.com" className="text-green-700 underline">admin@jumjuhub.com</a>으로 연락해 주세요.</p>
+            <p>이용약관에 관한 문의는 <a href="mailto:zerosblue7717@gmail.com" className="text-green-700 underline">zerosblue7717@gmail.com</a>으로 연락해 주세요.</p>
           </section>
         </div>
 

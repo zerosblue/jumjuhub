@@ -13,10 +13,10 @@ function extractEnglishPart(name: string): string | null {
 async function tryClearbit(domain: string): Promise<boolean> {
   try {
     const res = await fetch(`https://logo.clearbit.com/${domain}`, {
-      method: "HEAD",
-      signal: AbortSignal.timeout(3000),
+      signal: AbortSignal.timeout(4000),
     });
-    return res.ok;
+    const ct = res.headers.get("content-type") ?? "";
+    return res.ok && ct.startsWith("image/");
   } catch {
     return false;
   }

@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { v2 as cloudinary } from "cloudinary";
-
-cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+import { put } from "@vercel/blob";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -28,19 +22,14 @@ export async function POST(req: NextRequest) {
 
   for (const file of files) {
     if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json({ error: `파일 크기는 5MB 이하여야 합니다.` }, { status: 400 });
+      return NextResponse.json({ error: "파일 크기는 5MB 이하여야 합니다." }, { status: 400 });
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const base64 = `data:${file.type};base64,${buffer.toString("base64")}`;
+    const ext = file.name.split(".").pop() ?? "jpg";
+    const filename = `uploads/${session.user.id}-${Date.now()}.${ext}`;
 
-    const result = await cloudinary.uploader.upload(base64, {
-      folder: "jumjuhub",
-      resource_type: "image",
-    });
-
-    urls.push(result.secure_url);
+    const blob = await put(filename, file, { access: "public" });
+    urls.push(blob.url);
   }
 
   return NextResponse.json({ urls });

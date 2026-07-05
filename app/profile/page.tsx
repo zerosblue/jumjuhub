@@ -159,7 +159,7 @@ function NicknameEditButton({ currentNickname }: { currentNickname: string }) {
       href="/profile/edit"
       className="flex-1 flex items-center justify-center gap-1.5 bg-green-800 text-white text-sm font-medium py-2 rounded-xl hover:bg-green-700 transition-colors"
     >
-      닉네임 변경
+      프로필 수정
     </Link>
   );
 }

@@ -18,7 +18,7 @@ interface BrandCardProps {
 export default function BrandCard({ brand, rank }: BrandCardProps) {
   return (
     <Link
-      href={`/brand/${brand.slug}`}
+      href={`/brand/${encodeURIComponent(brand.slug)}`}
       className="block bg-white rounded-xl border border-gray-200 p-4 hover:border-green-300 hover:shadow-md transition-all group"
     >
       <div className="flex items-start gap-3">

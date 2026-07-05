@@ -3,6 +3,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Header from "@/components/Header";
+import SyncButton from "@/components/admin/SyncButton";
 
 async function getAdminStats() {
   const [userCount, postCount, pendingReports, pendingVerifications, brandCount] =
@@ -111,10 +112,7 @@ export default async function AdminPage() {
           {/* 공정위 데이터 동기화 */}
           <section className="bg-white rounded-2xl border border-gray-100 p-5">
             <h2 className="font-bold text-gray-900 mb-4">공정위 데이터 관리</h2>
-            <p className="text-sm text-gray-600 mb-4">
-              현재 브랜드 수: <strong>{stats.brandCount.toLocaleString()}개</strong>
-            </p>
-            <SyncButton />
+            <SyncButton initialCount={stats.brandCount} />
           </section>
 
           {/* 최근 가입자 */}
@@ -170,21 +168,3 @@ function BlindPostButton({ postId }: { postId: string }) {
   );
 }
 
-function SyncButton() {
-  return (
-    <form action={async () => {
-      "use server";
-      await fetch(`${process.env.NEXTAUTH_URL}/api/franchise-sync`, {
-        method: "POST",
-        headers: { "Cookie": "" },
-      });
-    }}>
-      <button
-        type="submit"
-        className="bg-green-800 text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-green-700 transition-colors"
-      >
-        공정위 데이터 동기화
-      </button>
-    </form>
-  );
-}

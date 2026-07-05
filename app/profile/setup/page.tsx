@@ -23,9 +23,7 @@ export default function ProfileSetupPage() {
     });
 
     if (res.ok) {
-      await update(); // 세션 갱신
-      router.push("/");
-      router.refresh();
+      window.location.replace("/");
     } else {
       const data = await res.json();
       setError(data.error ?? "오류가 발생했습니다.");

@@ -126,13 +126,13 @@ export default function WritePostContent() {
   const isAdmin = session?.user?.role === "ADMIN";
   const BOARDS = isAdmin ? ALL_BOARDS : ALL_BOARDS.filter((b) => b !== "NOTICE");
 
-  const defaultBoard = (searchParams.get("board") ?? "FREE") as BoardType;
+  const defaultBoard = (searchParams.get("board") ?? "") as BoardType | "";
   const initialBrandId = searchParams.get("brandId") ?? "";
   const initialBrandName = searchParams.get("brandName") ?? "";
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [boardType, setBoardType] = useState<BoardType>(defaultBoard);
+  const [boardType, setBoardType] = useState<BoardType | "">(defaultBoard);
   const [brandId, setBrandId] = useState(initialBrandId);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [images, setImages] = useState<string[]>([]);
@@ -175,6 +175,17 @@ export default function WritePostContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!boardType) {
+      setError("게시판을 선택해주세요.");
+      setSubmitting(false);
+      return;
+    }
+    if (!brandId) {
+      setError("관련 브랜드를 선택해주세요.");
+      setSubmitting(false);
+      return;
+    }
 
     if (boardType === "REVIEW" && session.user.verifyLevel === "NONE") {
       setError("점주 후기는 점주 인증 후 작성 가능합니다.");
@@ -221,7 +232,12 @@ export default function WritePostContent() {
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
           {/* 게시판 선택 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">게시판</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              게시판 <span className="text-red-500">*</span>
+            </label>
+            {!boardType && (
+              <p className="text-xs text-red-400 mb-2">게시판을 선택해주세요</p>
+            )}
             <div className="flex flex-wrap gap-2">
               {BOARDS.map((b) => {
                 const { label, icon } = boardTypeLabel(b);
@@ -249,8 +265,11 @@ export default function WritePostContent() {
           {/* 관련 브랜드 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              관련 브랜드 <span className="text-gray-400 font-normal">(선택)</span>
+              관련 브랜드 <span className="text-red-500">*</span>
             </label>
+            {!brandId && (
+              <p className="text-xs text-red-400 mb-1">브랜드를 검색하여 선택해주세요</p>
+            )}
             <BrandSearch
               initialBrandId={initialBrandId}
               initialBrandName={initialBrandName}
@@ -349,7 +368,7 @@ export default function WritePostContent() {
             </button>
             <button
               type="submit"
-              disabled={submitting || uploading || !title.trim() || !content.trim()}
+              disabled={submitting || uploading || !title.trim() || !content.trim() || !boardType || !brandId}
               className="px-5 py-2 text-sm bg-green-800 text-white rounded-xl hover:bg-green-700 disabled:opacity-50 font-medium"
             >
               {uploading ? "이미지 업로드 중..." : submitting ? "등록 중..." : "게시글 등록"}

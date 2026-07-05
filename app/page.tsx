@@ -6,6 +6,7 @@ import BrandCard from "@/components/BrandCard";
 import PostCard from "@/components/PostCard";
 import AdSensePlaceholder from "@/components/AdSensePlaceholder";
 import { formatDate } from "@/lib/utils";
+import { getNews } from "@/lib/news";
 
 const CATEGORIES = [
   { name: "치킨", icon: "🍗", slug: "치킨" },
@@ -74,7 +75,10 @@ async function getHomeData() {
 }
 
 export default async function HomePage() {
-  const { topBrands, recentPosts, lastSync } = await getHomeData();
+  const [{ topBrands, recentPosts, lastSync }, latestNews] = await Promise.all([
+    getHomeData(),
+    getNews("전체", 3),
+  ]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -139,6 +143,40 @@ export default async function HomePage() {
                 <div className="space-y-2">
                   {topBrands.map((brand, i) => (
                     <BrandCard key={brand.id} brand={brand} rank={i + 1} />
+                  ))}
+                </div>
+              )}
+            </section>
+            {/* 뉴스 미리보기 */}
+            <section>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-base font-bold text-gray-900">📰 프랜차이즈 최신 뉴스</h2>
+                <Link href="/news" className="text-xs text-green-700 hover:underline">
+                  더보기 →
+                </Link>
+              </div>
+              {latestNews.length === 0 ? (
+                <div className="bg-white rounded-xl border border-gray-100 p-6 text-center text-gray-400 text-sm">
+                  뉴스를 불러오는 중입니다.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {latestNews.map((item, i) => (
+                    <a
+                      key={i}
+                      href={item.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group bg-white rounded-xl border border-gray-100 p-4 hover:border-green-300 hover:shadow-md transition-all"
+                    >
+                      <p className="text-xs font-semibold text-green-700 mb-1.5">프랜차이즈</p>
+                      <p className="text-sm font-medium text-gray-900 group-hover:text-green-800 line-clamp-3 leading-snug">
+                        {item.title}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-2">
+                        {item.pubDate ? new Date(item.pubDate).toLocaleDateString("ko-KR") : ""}
+                      </p>
+                    </a>
                   ))}
                 </div>
               )}

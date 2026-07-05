@@ -68,6 +68,7 @@ export default function Header() {
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
             <Link href="/brand" className="hover:text-green-800 transition-colors">브랜드 탐색</Link>
             <Link href="/community" className="hover:text-green-800 transition-colors">커뮤니티</Link>
+            <Link href="/news" className="hover:text-green-800 transition-colors">뉴스</Link>
             <Link href="/community?board=QNA" className="hover:text-green-800 transition-colors">창업 질문</Link>
             <Link href="/community?board=REPORT_ABUSE" className="hover:text-green-800 transition-colors">갑질 제보</Link>
           </nav>
@@ -198,6 +199,7 @@ export default function Header() {
             {[
               { href: "/brand", label: "브랜드 탐색" },
               { href: "/community", label: "전체 커뮤니티" },
+              { href: "/news", label: "뉴스" },
               { href: "/community?board=QNA", label: "창업 질문" },
               { href: "/community?board=REPORT_ABUSE", label: "갑질 제보" },
             ].map((item) => (

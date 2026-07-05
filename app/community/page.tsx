@@ -3,45 +3,7 @@ import { prisma } from "@/lib/prisma";
 import Header from "@/components/Header";
 import PostCard from "@/components/PostCard";
 import { boardTypeLabel } from "@/lib/utils";
-import { Flame, TrendingUp, Newspaper } from "lucide-react";
-
-async function getNews() {
-  try {
-    const queries = ["프랜차이즈", "가맹점", "창업"];
-    const results = await Promise.all(
-      queries.map((q) =>
-        fetch(`https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=ko&gl=KR&ceid=KR:ko`, {
-          headers: { "User-Agent": "Mozilla/5.0" },
-          next: { revalidate: 3600 },
-        })
-          .then((r) => r.text())
-          .catch(() => "")
-      )
-    );
-
-    const items: { title: string; link: string; pubDate: string }[] = [];
-    const seen = new Set<string>();
-
-    for (const xml of results) {
-      const matches = xml.match(/<item>([\s\S]*?)<\/item>/g) ?? [];
-      for (const item of matches.slice(0, 8)) {
-        const raw = item.match(/<title>([\s\S]*?)<\/title>/)?.[1] ?? "";
-        const title = raw.replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").replace(/&quot;/g, '"').trim();
-        const link = item.match(/<link>([\s\S]*?)<\/link>/)?.[1]?.trim() ?? "";
-        const pubDate = item.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1]?.trim() ?? "";
-        if (title && link && !seen.has(link)) {
-          seen.add(link);
-          items.push({ title, link, pubDate });
-        }
-      }
-    }
-
-    items.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
-    return items.slice(0, 10);
-  } catch {
-    return [];
-  }
-}
+import { Flame, TrendingUp } from "lucide-react";
 
 const BOARDS = ["NOTICE", "QNA", "REVIEW", "FREE", "REPORT_ABUSE", "TRADE"];
 
@@ -56,7 +18,6 @@ async function getHotPosts(board: string, page: number, q: string) {
     ];
   }
 
-  // 인기글: 최근 30일 내 게시글, 댓글 수 + 조회수 기준 정렬
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   if (!q) where.createdAt = { gte: thirtyDaysAgo };
@@ -97,18 +58,12 @@ export default async function CommunityPage({
   const page = parseInt(sp.page ?? "1");
   const q = sp.q ?? "";
 
-  const [{ posts, total, totalPages }, news] = await Promise.all([
-    getHotPosts(board, page, q),
-    getNews(),
-  ]);
+  const { posts, total, totalPages } = await getHotPosts(board, page, q);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-        <div className="flex gap-6">
-        <div className="flex-1 min-w-0">
-
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center justify-between mb-2">
           <div>
             <h1 className="text-xl font-black text-gray-900 flex items-center gap-2">
@@ -206,40 +161,6 @@ export default async function CommunityPage({
             ))}
           </div>
         )}
-        </div>
-
-          {/* 사이드바: 뉴스 */}
-          <aside className="hidden lg:block w-72 shrink-0">
-            <div className="bg-white rounded-2xl border border-gray-100 p-4 sticky top-20">
-              <div className="flex items-center gap-2 mb-3">
-                <Newspaper size={15} className="text-green-700" />
-                <h2 className="text-sm font-bold text-gray-900">프랜차이즈 뉴스</h2>
-              </div>
-              {news.length === 0 ? (
-                <p className="text-xs text-gray-400 text-center py-4">뉴스를 불러오는 중...</p>
-              ) : (
-                <div className="space-y-3">
-                  {news.map((item, i) => (
-                    <a
-                      key={i}
-                      href={item.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block group"
-                    >
-                      <p className="text-xs text-gray-800 group-hover:text-green-800 line-clamp-2 leading-relaxed">
-                        {item.title}
-                      </p>
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        {item.pubDate ? new Date(item.pubDate).toLocaleDateString("ko-KR") : ""}
-                      </p>
-                    </a>
-                  ))}
-                </div>
-              )}
-            </div>
-          </aside>
-        </div>
       </main>
     </div>
   );

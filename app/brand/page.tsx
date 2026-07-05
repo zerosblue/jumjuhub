@@ -6,7 +6,9 @@ import SearchBar from "@/components/SearchBar";
 
 const CATEGORIES = ["치킨", "커피", "한식", "분식", "피자", "제과제빵", "일식", "중식", "패스트푸드", "주점", "이미용", "교육 (외국어)"];
 
-async function getBrands(q: string, category: string, page: number) {
+type SortKey = "storeCount" | "avgRevenue" | "name";
+
+async function getBrands(q: string, category: string, page: number, sort: SortKey) {
   const where: any = {
     storeCount: { gt: 0 },
   };
@@ -15,18 +17,24 @@ async function getBrands(q: string, category: string, page: number) {
       { name: { contains: q, mode: "insensitive" } },
       { category: { contains: q, mode: "insensitive" } },
     ];
-    // 검색 시에는 데이터 없는 브랜드도 포함
     delete where.storeCount;
   }
   if (category) {
     where.subcategory = { contains: category, mode: "insensitive" };
   }
 
+  const orderBy =
+    sort === "name"
+      ? { name: "asc" as const }
+      : sort === "avgRevenue"
+      ? { avgRevenue: "desc" as const }
+      : { storeCount: "desc" as const };
+
   const limit = 24;
   const [brands, total] = await Promise.all([
     prisma.brand.findMany({
       where,
-      orderBy: { storeCount: "desc" },
+      orderBy,
       skip: (page - 1) * limit,
       take: limit,
       select: {
@@ -58,17 +66,24 @@ async function getBrands(q: string, category: string, page: number) {
   };
 }
 
+const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+  { key: "storeCount", label: "가맹점 수" },
+  { key: "avgRevenue", label: "평균 매출" },
+  { key: "name", label: "가나다순" },
+];
+
 export default async function BrandPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; category?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; category?: string; page?: string; sort?: string }>;
 }) {
   const sp = await searchParams;
   const q = sp.q ?? "";
   const category = sp.category ?? "";
   const page = parseInt(sp.page ?? "1");
+  const sort: SortKey = (sp.sort as SortKey) ?? "storeCount";
 
-  const { brands, total, totalPages } = await getBrands(q, category, page);
+  const { brands, total, totalPages } = await getBrands(q, category, page, sort);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -106,11 +121,28 @@ export default async function BrandPage({
           ))}
         </div>
 
-        <p className="text-sm text-gray-500 mb-4">
-          {q || category
-            ? `"${q || category}" 검색 결과 ${total.toLocaleString()}개`
-            : `전체 ${total.toLocaleString()}개 브랜드`}
-        </p>
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <p className="text-sm text-gray-500">
+            {q || category
+              ? `"${q || category}" 검색 결과 ${total.toLocaleString()}개`
+              : `전체 ${total.toLocaleString()}개 브랜드`}
+          </p>
+          <div className="flex gap-1.5">
+            {SORT_OPTIONS.map((opt) => (
+              <a
+                key={opt.key}
+                href={`/brand?${q ? `q=${encodeURIComponent(q)}&` : ""}${category ? `category=${encodeURIComponent(category)}&` : ""}sort=${opt.key}`}
+                className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors ${
+                  sort === opt.key
+                    ? "bg-green-800 text-white border-green-800"
+                    : "bg-white text-gray-600 border-gray-200 hover:border-green-400"
+                }`}
+              >
+                {opt.label}
+              </a>
+            ))}
+          </div>
+        </div>
 
         {brands.length === 0 ? (
           <div className="text-center py-20 text-gray-400">
@@ -131,7 +163,7 @@ export default async function BrandPage({
             {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => i + 1).map((p) => (
               <a
                 key={p}
-                href={`/brand?${q ? `q=${encodeURIComponent(q)}&` : ""}${category ? `category=${encodeURIComponent(category)}&` : ""}page=${p}`}
+                href={`/brand?${q ? `q=${encodeURIComponent(q)}&` : ""}${category ? `category=${encodeURIComponent(category)}&` : ""}${sort !== "storeCount" ? `sort=${sort}&` : ""}page=${p}`}
                 className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium border transition-colors ${
                   p === page
                     ? "bg-green-800 text-white border-green-800"

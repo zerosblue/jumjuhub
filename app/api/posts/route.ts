@@ -107,6 +107,23 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // 1분 내 동일 내용 중복 방지
+  const duplicate = await prisma.post.findFirst({
+    where: {
+      authorId: session.user.id,
+      title,
+      content,
+      createdAt: { gte: new Date(Date.now() - 60000) },
+    },
+    select: { id: true },
+  });
+  if (duplicate) {
+    return NextResponse.json(
+      { error: "동일한 내용의 게시글을 1분 내에 중복 작성할 수 없습니다." },
+      { status: 429 }
+    );
+  }
+
   let post;
   try {
     post = await prisma.post.create({

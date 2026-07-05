@@ -2,23 +2,57 @@
 
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Bell, Menu, X, ChevronDown, LogOut, User, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+interface Notification {
+  id: string;
+  type: string;
+  message: string;
+  link?: string | null;
+  isRead: boolean;
+  createdAt: string;
+}
 
 export default function Header() {
   const { data: session } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!session?.user) return;
     fetch("/api/notifications")
       .then((r) => r.json())
-      .then((data: any[]) => setUnreadCount(data.filter((n) => !n.isRead).length))
+      .then((data: Notification[]) => {
+        setNotifications(data);
+        setUnreadCount(data.filter((n) => !n.isRead).length);
+      })
       .catch(() => {});
   }, [session?.user]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const openNotifications = async () => {
+    setNotifOpen((prev) => !prev);
+    if (!notifOpen && unreadCount > 0) {
+      await fetch("/api/notifications", { method: "PATCH" });
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      setUnreadCount(0);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
@@ -42,14 +76,61 @@ export default function Header() {
           <div className="flex items-center gap-2">
             {session ? (
               <>
-                <Link href="/notifications" className="relative p-2 text-gray-500 hover:text-green-800">
-                  <Bell size={20} />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold leading-none">
-                      {unreadCount > 9 ? "9+" : unreadCount}
-                    </span>
+                <div ref={notifRef} className="relative">
+                  <button
+                    onClick={openNotifications}
+                    className="relative p-2 text-gray-500 hover:text-green-800"
+                  >
+                    <Bell size={20} />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold leading-none">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                    )}
+                  </button>
+
+                  {notifOpen && (
+                    <div className="absolute right-0 mt-1 w-80 bg-white rounded-xl shadow-lg border border-gray-100 z-50 overflow-hidden">
+                      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                        <span className="text-sm font-bold text-gray-900">알림</span>
+                        <Link
+                          href="/notifications"
+                          className="text-xs text-green-700 hover:underline"
+                          onClick={() => setNotifOpen(false)}
+                        >
+                          전체 보기
+                        </Link>
+                      </div>
+                      <div className="max-h-80 overflow-y-auto">
+                        {notifications.length === 0 ? (
+                          <p className="text-sm text-gray-400 text-center py-8">알림이 없습니다.</p>
+                        ) : (
+                          notifications.slice(0, 10).map((n) => (
+                            <div
+                              key={n.id}
+                              className={`px-4 py-3 border-b border-gray-50 last:border-0 ${!n.isRead ? "bg-green-50" : ""}`}
+                            >
+                              {n.link ? (
+                                <Link
+                                  href={n.link}
+                                  className="block text-sm text-gray-800 hover:text-green-800"
+                                  onClick={() => setNotifOpen(false)}
+                                >
+                                  {n.message}
+                                </Link>
+                              ) : (
+                                <p className="text-sm text-gray-800">{n.message}</p>
+                              )}
+                              <p className="text-xs text-gray-400 mt-0.5">
+                                {new Date(n.createdAt).toLocaleDateString("ko-KR")}
+                              </p>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
                   )}
-                </Link>
+                </div>
                 <div className="relative">
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}

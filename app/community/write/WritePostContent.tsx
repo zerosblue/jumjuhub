@@ -7,19 +7,23 @@ import Header from "@/components/Header";
 import { boardTypeLabel } from "@/lib/utils";
 import { Upload, X } from "lucide-react";
 
-const BOARDS = ["NOTICE", "QNA", "REVIEW", "FREE", "REPORT_ABUSE", "TRADE"] as const;
+const ALL_BOARDS = ["NOTICE", "QNA", "REVIEW", "FREE", "REPORT_ABUSE", "TRADE"] as const;
+type BoardType = typeof ALL_BOARDS[number];
 
 export default function WritePostContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const defaultBoard = (searchParams.get("board") ?? "FREE") as typeof BOARDS[number];
+  const isAdmin = session?.user?.role === "ADMIN";
+  const BOARDS = isAdmin ? ALL_BOARDS : ALL_BOARDS.filter((b) => b !== "NOTICE");
+
+  const defaultBoard = (searchParams.get("board") ?? "FREE") as BoardType;
   const brandId = searchParams.get("brandId") ?? "";
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [boardType, setBoardType] = useState<typeof BOARDS[number]>(defaultBoard);
+  const [boardType, setBoardType] = useState<BoardType>(defaultBoard);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);

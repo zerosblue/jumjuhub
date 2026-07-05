@@ -74,6 +74,13 @@ export async function POST(req: NextRequest) {
 
   const { title, content, brandId, boardType, isAnonymous, images } = parsed.data;
 
+  if (boardType === "NOTICE" && session.user.role !== "ADMIN") {
+    return NextResponse.json(
+      { error: "공지사항은 관리자만 작성할 수 있습니다." },
+      { status: 403 }
+    );
+  }
+
   if (boardType === "REVIEW" && session.user.verifyLevel === "NONE") {
     return NextResponse.json(
       { error: "점주 후기는 점주 인증 후 작성 가능합니다." },

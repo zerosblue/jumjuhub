@@ -7,12 +7,16 @@ import SearchBar from "@/components/SearchBar";
 const CATEGORIES = ["치킨", "커피", "한식", "분식", "피자", "제과제빵", "일식", "중식", "패스트푸드", "주점", "이미용", "교육 (외국어)"];
 
 async function getBrands(q: string, category: string, page: number) {
-  const where: any = {};
+  const where: any = {
+    storeCount: { gt: 0 },
+  };
   if (q) {
     where.OR = [
       { name: { contains: q, mode: "insensitive" } },
       { category: { contains: q, mode: "insensitive" } },
     ];
+    // 검색 시에는 데이터 없는 브랜드도 포함
+    delete where.storeCount;
   }
   if (category) {
     where.subcategory = { contains: category, mode: "insensitive" };

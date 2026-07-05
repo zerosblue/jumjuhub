@@ -747,6 +747,11 @@ export default function BrandLogo({ name, logoUrl, size = "md", className = "" }
         src={src}
         alt={name}
         onError={() => setFailed(true)}
+        onLoad={(e) => {
+          const img = e.currentTarget;
+          // Google Favicon API가 파비콘 못 찾으면 16x16 플레이스홀더 반환 → 폴백 처리
+          if (img.naturalWidth <= 16 && img.naturalHeight <= 16) setFailed(true);
+        }}
         className={`${s.box} rounded-lg object-contain border border-gray-100 bg-white shrink-0 ${className}`}
       />
     );

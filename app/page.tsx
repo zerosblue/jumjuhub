@@ -83,7 +83,7 @@ export default async function HomePage() {
       {/* 히어로 */}
       <section className="bg-green-800 text-white py-12 px-4">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-green-200 text-sm font-medium mb-2">11,000개+ 브랜드 · 공정위 공식 데이터</p>
+          <p className="text-green-200 text-sm font-medium mb-2">공정위 공식 데이터 · 실제 점주 후기</p>
           <h1 className="text-2xl sm:text-3xl font-black mb-2">
             진짜 점주들의 솔직한 이야기
           </h1>

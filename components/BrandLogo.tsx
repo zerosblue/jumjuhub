@@ -495,6 +495,8 @@ const DOMAIN_MAP: Record<string, string> = {
   "카카오T블루": "kakaomobility.com",
   "카카오T블루(kakaoTblue)": "kakaomobility.com",
   "카카오T": "kakaomobility.com",
+  "Uber Taxi (우버택시)": "uber.com",
+  "우버택시": "uber.com",
   "마카롱택시": "macaron.co.kr",
   "타다 라이트": "tadatada.co.kr",
   "타다 라이트(TADA LITE)": "tadatada.co.kr",

@@ -58,6 +58,9 @@ export function boardTypeLabel(type: string): { label: string; icon: string } {
     FREE: { label: "자유게시판", icon: "💬" },
     REPORT_ABUSE: { label: "본사 갑질 제보", icon: "😤" },
     TRADE: { label: "점포 양도/물품 거래", icon: "🛒" },
+    REVENUE: { label: "매출 공유", icon: "💰" },
+    LEGAL: { label: "법적 분쟁 정보", icon: "⚖️" },
+    CLOSURE: { label: "폐점/양도 정보", icon: "🚪" },
   };
   return map[type] ?? { label: type, icon: "📌" };
 }

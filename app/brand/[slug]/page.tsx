@@ -16,6 +16,9 @@ const BOARD_TYPES = [
   { type: "FREE" },
   { type: "REPORT_ABUSE" },
   { type: "TRADE" },
+  { type: "REVENUE" },
+  { type: "LEGAL" },
+  { type: "CLOSURE" },
 ] as const;
 
 async function getBrandData(slug: string) {

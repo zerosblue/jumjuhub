@@ -223,6 +223,9 @@ enum BoardType {
   FREE
   REPORT_ABUSE
   TRADE
+  REVENUE
+  LEGAL
+  CLOSURE
 }
 
 enum ReportTarget {

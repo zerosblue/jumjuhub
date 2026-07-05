@@ -5,10 +5,15 @@ import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Header from "@/components/Header";
 import { boardTypeLabel } from "@/lib/utils";
-import { Upload, X, Search } from "lucide-react";
+import { canWriteBoard, writeBlockReason } from "@/lib/permissions";
+import { Upload, X, Search, Lock } from "lucide-react";
 import { upload } from "@vercel/blob/client";
+import Link from "next/link";
 
-const ALL_BOARDS = ["NOTICE", "QNA", "REVIEW", "FREE", "REPORT_ABUSE", "TRADE"] as const;
+const ALL_BOARDS = [
+  "NOTICE", "QNA", "REVIEW", "FREE", "REPORT_ABUSE",
+  "TRADE", "REVENUE", "LEGAL", "CLOSURE",
+] as const;
 type BoardType = typeof ALL_BOARDS[number];
 
 interface BrandOption {
@@ -123,8 +128,12 @@ export default function WritePostContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const isAdmin = session?.user?.role === "ADMIN";
-  const BOARDS = isAdmin ? ALL_BOARDS : ALL_BOARDS.filter((b) => b !== "NOTICE");
+  const verifyLevel = (session?.user?.verifyLevel ?? "NONE") as "NONE" | "SELF" | "VERIFIED";
+  const role = (session?.user?.role ?? "USER") as "USER" | "ADMIN";
+
+  const BOARDS = role === "ADMIN"
+    ? ALL_BOARDS
+    : ALL_BOARDS.filter((b) => b !== "NOTICE");
 
   const defaultBoard = (searchParams.get("board") ?? "") as BoardType | "";
   const initialBrandId = searchParams.get("brandId") ?? "";
@@ -167,7 +176,7 @@ export default function WritePostContent() {
       }
       setImages((prev) => [...prev, ...urls]);
     } catch (err) {
-      setError((err as Error).message || "이미지 업로드 중 오류가 발생했습니다. 다시 시도해 주세요.");
+      setError((err as Error).message || "이미지 업로드 중 오류가 발생했습니다.");
     }
     setUploading(false);
   };
@@ -178,17 +187,10 @@ export default function WritePostContent() {
 
     if (!boardType) {
       setError("게시판을 선택해주세요.");
-      setSubmitting(false);
       return;
     }
     if (!brandId) {
       setError("관련 브랜드를 선택해주세요.");
-      setSubmitting(false);
-      return;
-    }
-
-    if (boardType === "REVIEW" && session.user.verifyLevel === "NONE") {
-      setError("점주 후기는 점주 인증 후 작성 가능합니다.");
       return;
     }
 
@@ -197,14 +199,7 @@ export default function WritePostContent() {
       const res = await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          content,
-          brandId: brandId || undefined,
-          boardType,
-          isAnonymous,
-          images,
-        }),
+        body: JSON.stringify({ title, content, brandId, boardType, isAnonymous, images }),
       });
 
       if (res.ok) {
@@ -218,7 +213,7 @@ export default function WritePostContent() {
         setSubmitting(false);
       }
     } catch {
-      setError("네트워크 오류가 발생했습니다. 다시 시도해 주세요.");
+      setError("네트워크 오류가 발생했습니다.");
       setSubmitting(false);
     }
   };
@@ -241,25 +236,44 @@ export default function WritePostContent() {
             <div className="flex flex-wrap gap-2">
               {BOARDS.map((b) => {
                 const { label, icon } = boardTypeLabel(b);
-                const disabled = b === "REVIEW" && session.user.verifyLevel === "NONE";
+                const canWrite = canWriteBoard(b, true, verifyLevel, role);
+                const reason = writeBlockReason(b, true, verifyLevel);
                 return (
                   <button
                     key={b}
                     type="button"
-                    disabled={disabled}
-                    onClick={() => setBoardType(b)}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
-                      boardType === b
+                    disabled={!canWrite}
+                    title={reason ?? undefined}
+                    onClick={() => canWrite && setBoardType(b)}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors flex items-center gap-1 ${
+                      !canWrite
+                        ? "bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed"
+                        : boardType === b
                         ? "bg-green-800 text-white border-green-800"
                         : "bg-white text-gray-600 border-gray-200 hover:border-green-400"
                     }`}
                   >
+                    {!canWrite && <Lock size={10} />}
                     {icon} {label}
-                    {disabled && " (인증 필요)"}
                   </button>
                 );
               })}
             </div>
+            {/* 잠긴 게시판 안내 */}
+            {verifyLevel === "NONE" && (
+              <p className="text-xs text-gray-400 mt-2">
+                🔒 잠긴 게시판은{" "}
+                <Link href="/profile/verify" className="text-green-700 underline">점주 인증</Link>
+                {" "}후 이용 가능합니다.
+              </p>
+            )}
+            {verifyLevel === "SELF" && (
+              <p className="text-xs text-gray-400 mt-2">
+                🔒 갑질제보·매출공유는{" "}
+                <Link href="/profile/verify" className="text-green-700 underline">사업자등록증 인증</Link>
+                {" "}후 이용 가능합니다.
+              </p>
+            )}
           </div>
 
           {/* 관련 브랜드 */}

@@ -1,16 +1,19 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 import Header from "@/components/Header";
 import PostCard from "@/components/PostCard";
 import { boardTypeLabel } from "@/lib/utils";
-import { Flame, TrendingUp } from "lucide-react";
+import { canReadBoard } from "@/lib/permissions";
+import { Flame, TrendingUp, Lock } from "lucide-react";
 
-const BOARDS = ["NOTICE", "QNA", "REVIEW", "FREE", "REPORT_ABUSE", "TRADE"];
+const BOARDS = ["NOTICE", "QNA", "REVIEW", "FREE", "REPORT_ABUSE", "TRADE", "REVENUE", "LEGAL", "CLOSURE"];
 
-async function getHotPosts(board: string, page: number, q: string) {
+async function getHotPosts(board: string, page: number, q: string, allowedBoards: string[] | null) {
   const limit = 20;
   const where: any = { isBlinded: false };
   if (board) where.boardType = board;
+  else if (allowedBoards) where.boardType = { in: allowedBoards };
   if (q) {
     where.OR = [
       { title: { contains: q, mode: "insensitive" } },
@@ -58,7 +61,35 @@ export default async function CommunityPage({
   const page = parseInt(sp.page ?? "1");
   const q = sp.q ?? "";
 
-  const { posts, total, totalPages } = await getHotPosts(board, page, q);
+  const session = await auth();
+  const vl = (session?.user?.verifyLevel ?? "NONE") as "NONE" | "SELF" | "VERIFIED";
+  const role = (session?.user?.role ?? "USER") as "USER" | "ADMIN";
+  const isLoggedIn = !!session?.user;
+
+  // 잠긴 게시판 접근 차단
+  if (board && !canReadBoard(board, isLoggedIn, vl, role)) {
+    const info = boardTypeLabel(board);
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="max-w-sm mx-auto px-4 py-20 text-center">
+          <Lock size={44} className="text-gray-300 mx-auto mb-4" />
+          <h1 className="text-lg font-black text-gray-900 mb-2">{info.icon} {info.label}</h1>
+          <p className="text-sm text-gray-500 mb-6">
+            이 게시판은 로그인 후 열람할 수 있습니다.<br />점주 인증이 필요합니다.
+          </p>
+          <Link href="/auth/signin" className="inline-block bg-green-800 text-white text-sm font-medium px-6 py-2.5 rounded-xl hover:bg-green-700">
+            로그인하기
+          </Link>
+        </main>
+      </div>
+    );
+  }
+
+  // 비로그인 시 전체 목록에서 잠긴 게시판 글 제외
+  const allowedBoards = isLoggedIn ? null : BOARDS.filter((b) => canReadBoard(b, false, vl, role));
+
+  const { posts, total, totalPages } = await getHotPosts(board, page, q, allowedBoards);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -100,14 +131,21 @@ export default async function CommunityPage({
           </Link>
           {BOARDS.map((b) => {
             const { label, icon } = boardTypeLabel(b);
+            const locked = !canReadBoard(b, isLoggedIn, vl, role);
             return (
               <Link
                 key={b}
                 href={`/community?board=${b}`}
-                className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                  board === b ? "bg-green-800 text-white" : "bg-white text-gray-600 hover:bg-gray-100"
+                title={locked ? "점주 인증이 필요합니다" : undefined}
+                className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-1 ${
+                  board === b
+                    ? "bg-green-800 text-white"
+                    : locked
+                    ? "bg-gray-50 text-gray-400"
+                    : "bg-white text-gray-600 hover:bg-gray-100"
                 }`}
               >
+                {locked && <Lock size={11} />}
                 {icon} {label}
               </Link>
             );

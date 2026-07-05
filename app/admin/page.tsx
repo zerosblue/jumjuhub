@@ -70,7 +70,10 @@ export default async function AdminPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* 점주 인증 대기 */}
           <section className="bg-white rounded-2xl border border-gray-100 p-5">
-            <h2 className="font-bold text-gray-900 mb-4">점주 인증 대기 ({stats.pendingVerifications})</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-bold text-gray-900">점주 인증 대기 ({stats.pendingVerifications})</h2>
+              <Link href="/admin/verify" className="text-xs text-green-700 hover:underline">인증 관리 →</Link>
+            </div>
             {stats.pendingVerifs.length === 0 ? (
               <p className="text-sm text-gray-400">대기 중인 인증이 없습니다.</p>
             ) : (

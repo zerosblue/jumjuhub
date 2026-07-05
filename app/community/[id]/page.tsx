@@ -2,10 +2,12 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 import Header from "@/components/Header";
 import CommentSection from "@/components/CommentSection";
 import { formatDate, boardTypeLabel } from "@/lib/utils";
-import { Shield, Eye, ArrowLeft } from "lucide-react";
+import { canReadBoard } from "@/lib/permissions";
+import { Shield, Eye, ArrowLeft, Lock } from "lucide-react";
 import PostActions from "@/components/PostActions";
 import LikeButton from "@/components/LikeButton";
 
@@ -62,8 +64,35 @@ export default async function PostDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const post = await getPost(id);
+  const [post, session] = await Promise.all([getPost(id), auth()]);
   if (!post) notFound();
+
+  // 읽기 권한 체크 (REVIEW/REPORT_ABUSE/REVENUE/LEGAL/CLOSURE는 로그인 필요)
+  const vl = (session?.user?.verifyLevel ?? "NONE") as "NONE" | "SELF" | "VERIFIED";
+  const role = (session?.user?.role ?? "USER") as "USER" | "ADMIN";
+  if (!canReadBoard(post.boardType, !!session?.user, vl, role)) {
+    const boardInfo = boardTypeLabel(post.boardType);
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="max-w-sm mx-auto px-4 py-20 text-center">
+          <Lock size={44} className="text-gray-300 mx-auto mb-4" />
+          <h1 className="text-lg font-black text-gray-900 mb-2">
+            {boardInfo.icon} {boardInfo.label}
+          </h1>
+          <p className="text-sm text-gray-500 mb-6">
+            이 게시판은 로그인 후 열람할 수 있습니다.<br />점주 인증이 필요합니다.
+          </p>
+          <Link
+            href="/auth/signin"
+            className="inline-block bg-green-800 text-white text-sm font-medium px-6 py-2.5 rounded-xl hover:bg-green-700"
+          >
+            로그인하기
+          </Link>
+        </main>
+      </div>
+    );
+  }
 
   // viewCount 증가 — 실패해도 페이지 렌더링은 계속
   prisma.post.update({ where: { id }, data: { viewCount: { increment: 1 } } }).catch(() => {});

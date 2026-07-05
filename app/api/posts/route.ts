@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { hashIp } from "@/lib/utils";
+import { canWriteBoard, writeBlockReason } from "@/lib/permissions";
 import { z } from "zod";
 
 const createSchema = z.object({
   title: z.string().min(2).max(200),
   content: z.string().min(5).max(10000),
   brandId: z.string().optional(),
-  boardType: z.enum(["NOTICE", "QNA", "REVIEW", "FREE", "REPORT_ABUSE", "TRADE"]),
+  boardType: z.enum(["NOTICE", "QNA", "REVIEW", "FREE", "REPORT_ABUSE", "TRADE", "REVENUE", "LEGAL", "CLOSURE"]),
   isAnonymous: z.boolean().default(false),
   images: z.array(z.string().min(1)).max(5).default([]),
 });
@@ -76,18 +77,11 @@ export async function POST(req: NextRequest) {
 
   const { title, content, brandId, boardType, isAnonymous, images } = parsed.data;
 
-  if (boardType === "NOTICE" && session.user.role !== "ADMIN") {
-    return NextResponse.json(
-      { error: "공지사항은 관리자만 작성할 수 있습니다." },
-      { status: 403 }
-    );
-  }
-
-  if (boardType === "REVIEW" && session.user.verifyLevel === "NONE") {
-    return NextResponse.json(
-      { error: "점주 후기는 점주 인증 후 작성 가능합니다." },
-      { status: 403 }
-    );
+  const vl = (session.user.verifyLevel ?? "NONE") as "NONE" | "SELF" | "VERIFIED";
+  const role = (session.user.role ?? "USER") as "USER" | "ADMIN";
+  if (!canWriteBoard(boardType, true, vl, role)) {
+    const reason = writeBlockReason(boardType, true, vl) ?? "작성 권한이 없습니다.";
+    return NextResponse.json({ error: reason }, { status: 403 });
   }
 
   const ip = req.headers.get("x-forwarded-for") ?? "unknown";

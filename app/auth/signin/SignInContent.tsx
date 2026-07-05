@@ -12,7 +12,7 @@ export default function SignInContent() {
       <div className="w-full max-w-sm bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-black text-green-800 mb-1">점주허브</h1>
-          <p className="text-sm text-gray-500">4,600개 브랜드, 진짜 점주들의 솔직한 이야기</p>
+          <p className="text-sm text-gray-500">11,700개 브랜드, 진짜 점주들의 솔직한 이야기</p>
         </div>
 
         <div className="space-y-3">

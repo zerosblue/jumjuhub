@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
 import Header from "@/components/Header";
 import { Upload, X } from "lucide-react";
+import { upload } from "@vercel/blob/client";
 
 export default function EditPostPage() {
   const { data: session, status } = useSession();
@@ -51,17 +52,18 @@ export default function EditPostPage() {
     }
     setUploading(true);
     try {
-      const formData = new FormData();
-      files.forEach((f) => formData.append("files", f));
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      if (res.ok) {
-        const { urls } = await res.json();
-        setImages((prev) => [...prev, ...urls]);
-      } else {
-        setError("이미지 업로드에 실패했습니다.");
+      const urls: string[] = [];
+      for (const file of files) {
+        const blob = await upload(
+          `uploads/${Date.now()}-${file.name}`,
+          file,
+          { access: "public", handleUploadUrl: "/api/upload" }
+        );
+        urls.push(blob.url);
       }
-    } catch {
-      setError("이미지 업로드 중 오류가 발생했습니다.");
+      setImages((prev) => [...prev, ...urls]);
+    } catch (err) {
+      setError((err as Error).message || "이미지 업로드 중 오류가 발생했습니다.");
     }
     setUploading(false);
   };

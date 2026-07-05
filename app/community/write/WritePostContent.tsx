@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Header from "@/components/Header";
 import { boardTypeLabel } from "@/lib/utils";
 import { Upload, X } from "lucide-react";
+import { upload } from "@vercel/blob/client";
 
 const ALL_BOARDS = ["NOTICE", "QNA", "REVIEW", "FREE", "REPORT_ABUSE", "TRADE"] as const;
 type BoardType = typeof ALL_BOARDS[number];
@@ -46,21 +47,18 @@ export default function WritePostContent() {
 
     setUploading(true);
     try {
-      const formData = new FormData();
-      files.forEach((f) => formData.append("files", f));
-
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      if (res.ok) {
-        const { urls } = await res.json();
-        setImages((prev) => [...prev, ...urls]);
-      } else {
-        const text = await res.text().catch(() => "");
-        let msg = "이미지 업로드에 실패했습니다.";
-        try { msg = JSON.parse(text).error ?? msg; } catch {}
-        setError(msg);
+      const urls: string[] = [];
+      for (const file of files) {
+        const blob = await upload(
+          `uploads/${Date.now()}-${file.name}`,
+          file,
+          { access: "public", handleUploadUrl: "/api/upload" }
+        );
+        urls.push(blob.url);
       }
-    } catch {
-      setError("이미지 업로드 중 오류가 발생했습니다. 다시 시도해 주세요.");
+      setImages((prev) => [...prev, ...urls]);
+    } catch (err) {
+      setError((err as Error).message || "이미지 업로드 중 오류가 발생했습니다. 다시 시도해 주세요.");
     }
     setUploading(false);
   };

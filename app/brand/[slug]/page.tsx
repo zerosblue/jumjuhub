@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import PostCard from "@/components/PostCard";
 import AdSensePlaceholder from "@/components/AdSensePlaceholder";
 import { formatCurrency, formatNumber, formatDate, boardTypeLabel } from "@/lib/utils";
-import { Store, Calendar, FileText, TrendingUp, DollarSign, Info } from "lucide-react";
+import { Store, Calendar, FileText, TrendingUp, DollarSign, Info, ChevronRight } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
 
 const BOARD_TYPES = [
@@ -63,7 +63,6 @@ function StoreHistoryChart({ history }: { history: { year: number; totalCount: n
 
   return (
     <div>
-      {/* 총 가맹점 수 추이 */}
       <div className="flex items-center w-full mb-4 overflow-x-auto">
         {history.map((h, i) => {
           const prev = history[i - 1];
@@ -81,32 +80,23 @@ function StoreHistoryChart({ history }: { history: { year: number; totalCount: n
           );
         })}
       </div>
-
-      {/* 신규/폐점 바 차트 */}
       <div className="flex items-end w-full">
         {history.map((h) => (
           <div key={h.year} className="flex-1 flex flex-col items-center gap-1">
             <div className="flex items-end gap-1" style={{ height: `${BAR_H}px` }}>
               <div className="flex flex-col justify-end items-center" style={{ width: 14 }}>
                 <span className="text-xs text-green-700 font-bold mb-0.5" style={{ fontSize: 10 }}>{h.newCount}</span>
-                <div
-                  className="bg-green-500 rounded-t"
-                  style={{ width: 14, height: `${(h.newCount / maxBar) * (BAR_H - 20)}px`, minHeight: h.newCount ? 4 : 0 }}
-                />
+                <div className="bg-green-500 rounded-t" style={{ width: 14, height: `${(h.newCount / maxBar) * (BAR_H - 20)}px`, minHeight: h.newCount ? 4 : 0 }} />
               </div>
               <div className="flex flex-col justify-end items-center" style={{ width: 14 }}>
                 <span className="text-xs text-red-500 font-bold mb-0.5" style={{ fontSize: 10 }}>{h.closedCount}</span>
-                <div
-                  className="bg-red-400 rounded-t"
-                  style={{ width: 14, height: `${(h.closedCount / maxBar) * (BAR_H - 20)}px`, minHeight: h.closedCount ? 4 : 0 }}
-                />
+                <div className="bg-red-400 rounded-t" style={{ width: 14, height: `${(h.closedCount / maxBar) * (BAR_H - 20)}px`, minHeight: h.closedCount ? 4 : 0 }} />
               </div>
             </div>
             <p className="text-xs text-gray-400">{h.year}</p>
           </div>
         ))}
       </div>
-
       <div className="flex gap-4 mt-3 text-xs text-gray-500">
         <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-green-500" />신규 개점</span>
         <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-sm bg-red-400" />폐점</span>
@@ -145,98 +135,103 @@ export default async function BrandDetailPage({
     <div className="min-h-screen bg-gray-50">
       <Header />
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-4">
-        <AdSensePlaceholder format="horizontal" />
-      </div>
+      {/* 브랜드 히어로 배너 */}
+      <section className="bg-green-800 text-white">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+          {/* 브레드크럼 */}
+          <div className="flex items-center gap-1.5 text-green-300 text-xs mb-4">
+            <Link href="/brand" className="hover:text-white transition-colors">브랜드 탐색</Link>
+            <ChevronRight size={12} />
+            <span className="text-green-200">{brand.category}</span>
+          </div>
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-4">
-
-        {/* ── 브랜드 헤더 ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-5">
-          <div className="flex items-start gap-4">
-            <BrandLogo name={brand.name} logoUrl={brand.logoUrl} size="lg" />
-            <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-4">
+            {/* 로고 (흰 배경 원형) */}
+            <div className="w-16 h-16 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0 overflow-hidden">
+              <BrandLogo name={brand.name} logoUrl={brand.logoUrl} size="lg" />
+            </div>
+            <div>
               <div className="flex flex-wrap gap-1.5 mb-1">
-                <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-medium">{brand.category}</span>
-                {brand.subcategory && (
-                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{brand.subcategory}</span>
+                <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded-full font-medium">{brand.category}</span>
+                {brand.subcategory && brand.subcategory !== brand.category && (
+                  <span className="text-xs bg-white/10 text-green-200 px-2 py-0.5 rounded-full">{brand.subcategory}</span>
                 )}
               </div>
-              <h1 className="text-2xl font-black text-gray-900">{brand.name}</h1>
+              <h1 className="text-2xl sm:text-3xl font-black">{brand.name}</h1>
               {brand.dataUpdatedAt && (
-                <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                <p className="text-green-300 text-xs mt-1 flex items-center gap-1">
                   <Info size={11} />
                   {new Date(brand.dataUpdatedAt).getFullYear()}년 공정위 정보공개서 기준
                 </p>
               )}
             </div>
           </div>
-        </div>
 
-        {/* ── 핵심 지표 카드 ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-            <Store size={16} className="text-gray-400 mx-auto mb-1.5" />
-            <p className="text-xs text-gray-500 mb-1">가맹점 수</p>
-            <p className="text-lg font-black text-gray-900">
-              {brand.storeCount != null ? `${formatNumber(brand.storeCount)}개` : "-"}
-            </p>
-          </div>
-
-          <div className="bg-amber-50 rounded-xl border border-amber-100 p-4 text-center">
-            <TrendingUp size={16} className="text-amber-500 mx-auto mb-1.5" />
-            <p className="text-xs text-amber-600 mb-1">연 평균매출</p>
-            <p className="text-lg font-black text-amber-600">
-              {brand.avgRevenue ? formatCurrency(brand.avgRevenue) : "-"}
-            </p>
-          </div>
-
-          <div className="bg-green-50 rounded-xl border border-green-100 p-4 text-center">
-            <Calendar size={16} className="text-green-600 mx-auto mb-1.5" />
-            <p className="text-xs text-green-700 mb-1">신규 개점</p>
-            <p className="text-lg font-black text-green-700">
-              {latestHistory ? `+${latestHistory.newCount}개` : "-"}
-            </p>
-            {latestHistory && <p className="text-xs text-gray-400">{latestHistory.year}년</p>}
-          </div>
-
-          <div className="bg-red-50 rounded-xl border border-red-100 p-4 text-center">
-            <FileText size={16} className="text-red-400 mx-auto mb-1.5" />
-            <p className="text-xs text-red-500 mb-1">폐점</p>
-            <p className="text-lg font-black text-red-500">
-              {latestHistory ? `-${latestHistory.closedCount}개` : "-"}
-            </p>
-            {latestHistory && <p className="text-xs text-gray-400">{latestHistory.year}년</p>}
+          {/* 핵심 지표 (배너 하단) */}
+          <div className="grid grid-cols-4 gap-3 mt-6 pt-5 border-t border-white/20">
+            <div className="text-center">
+              <p className="text-green-300 text-xs mb-1">가맹점 수</p>
+              <p className="text-white font-black text-lg">
+                {brand.storeCount != null ? `${formatNumber(brand.storeCount)}개` : "-"}
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-green-300 text-xs mb-1">연 평균매출</p>
+              <p className="text-amber-300 font-black text-lg">
+                {brand.avgRevenue ? formatCurrency(brand.avgRevenue) : "-"}
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-green-300 text-xs mb-1">신규 개점</p>
+              <p className="text-white font-black text-lg">
+                {latestHistory ? `+${latestHistory.newCount}` : "-"}
+              </p>
+              {latestHistory && <p className="text-green-400 text-xs">{latestHistory.year}년</p>}
+            </div>
+            <div className="text-center">
+              <p className="text-green-300 text-xs mb-1">폐점</p>
+              <p className="text-red-300 font-black text-lg">
+                {latestHistory ? `-${latestHistory.closedCount}` : "-"}
+              </p>
+              {latestHistory && <p className="text-green-400 text-xs">{latestHistory.year}년</p>}
+            </div>
           </div>
         </div>
+      </section>
+
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-4">
+        <AdSensePlaceholder format="horizontal" />
+      </div>
+
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-4">
 
         {/* ── 연도별 가맹점 현황 차트 ── */}
         {brand.storeHistory.length > 0 && (
-          <div className="bg-white rounded-2xl border border-gray-100 p-5">
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
             <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <TrendingUp size={16} className="text-green-600" />
+              <span className="w-1 h-4 bg-green-800 rounded-full inline-block" />
               연도별 가맹점 현황
             </h2>
             <StoreHistoryChart history={brand.storeHistory} />
           </div>
         )}
 
-        {/* ── 창업 비용 상세 ── */}
+        {/* ── 창업 비용 + 계약 조건 (교차 배경) ── */}
         {costItems.length > 0 && (
-          <div className="bg-white rounded-2xl border border-gray-100 p-5">
+          <div className="bg-gray-50 rounded-2xl border border-gray-100 p-5">
             <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <DollarSign size={16} className="text-green-600" />
+              <span className="w-1 h-4 bg-amber-400 rounded-full inline-block" />
               창업 비용 상세
             </h2>
-            <div className="space-y-2">
+            <div className="space-y-1">
               {costItems.map((item) => (
-                <div key={item.label} className="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                <div key={item.label} className="flex justify-between items-center py-2.5 border-b border-gray-200 last:border-0">
                   <span className="text-sm text-gray-600">{item.label}</span>
                   <span className="text-sm font-bold text-gray-900">{formatCurrency(item.value)}</span>
                 </div>
               ))}
               {totalCost > 0 && (
-                <div className="flex justify-between items-center py-2 pt-3 border-t border-gray-200 mt-1">
+                <div className="flex justify-between items-center py-3 mt-1 bg-green-50 rounded-xl px-3">
                   <span className="text-sm font-bold text-gray-800">총 창업비용 (합산)</span>
                   <span className="text-base font-black text-green-800">{formatCurrency(totalCost)}</span>
                 </div>
@@ -247,34 +242,34 @@ export default async function BrandDetailPage({
 
         {/* ── 계약 조건 ── */}
         {(brand.adFee !== null || brand.royaltyFee !== null || brand.contractPeriod !== null || brand.directStoreCount !== null) && (
-          <div className="bg-white rounded-2xl border border-gray-100 p-5">
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
             <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <FileText size={16} className="text-green-600" />
+              <span className="w-1 h-4 bg-green-800 rounded-full inline-block" />
               계약 조건
             </h2>
-            <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-3">
               {brand.contractPeriod !== null && (
-                <div className="flex justify-between py-2 border-b border-gray-50">
-                  <span className="text-sm text-gray-600">계약 기간</span>
-                  <span className="text-sm font-bold text-gray-900">{brand.contractPeriod}년</span>
+                <div className="bg-gray-50 rounded-xl p-3 text-center">
+                  <p className="text-xs text-gray-500 mb-1">계약 기간</p>
+                  <p className="text-lg font-black text-gray-900">{brand.contractPeriod}년</p>
                 </div>
               )}
               {brand.adFee !== null && (
-                <div className="flex justify-between py-2 border-b border-gray-50">
-                  <span className="text-sm text-gray-600">광고분담금</span>
-                  <span className="text-sm font-bold text-gray-900">{brand.adFee}%</span>
+                <div className="bg-gray-50 rounded-xl p-3 text-center">
+                  <p className="text-xs text-gray-500 mb-1">광고분담금</p>
+                  <p className="text-lg font-black text-gray-900">{brand.adFee}%</p>
                 </div>
               )}
               {brand.royaltyFee !== null && (
-                <div className="flex justify-between py-2 border-b border-gray-50">
-                  <span className="text-sm text-gray-600">로열티</span>
-                  <span className="text-sm font-bold text-gray-900">{brand.royaltyFee}%</span>
+                <div className="bg-gray-50 rounded-xl p-3 text-center">
+                  <p className="text-xs text-gray-500 mb-1">로열티</p>
+                  <p className="text-lg font-black text-gray-900">{brand.royaltyFee}%</p>
                 </div>
               )}
               {brand.directStoreCount !== null && (
-                <div className="flex justify-between py-2">
-                  <span className="text-sm text-gray-600">직영점 수</span>
-                  <span className="text-sm font-bold text-gray-900">{formatNumber(brand.directStoreCount)}개</span>
+                <div className="bg-gray-50 rounded-xl p-3 text-center">
+                  <p className="text-xs text-gray-500 mb-1">직영점 수</p>
+                  <p className="text-lg font-black text-gray-900">{formatNumber(brand.directStoreCount)}개</p>
                 </div>
               )}
             </div>
@@ -282,11 +277,14 @@ export default async function BrandDetailPage({
         )}
 
         {/* ── 브랜드 전용 커뮤니티 ── */}
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h2 className="font-bold text-gray-900">{brand.name} 게시판</h2>
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+          <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+            <div>
+              <h2 className="font-bold text-gray-900">{brand.name} 게시판</h2>
+              <p className="text-xs text-gray-400 mt-0.5">게시글 {brand._count.posts.toLocaleString()}개</p>
+            </div>
             <Link
-              href={`/community/write?brandId=${brand.id}&board=${board || "FREE"}`}
+              href={`/community/write?brandId=${brand.id}&brandName=${encodeURIComponent(brand.name)}&board=${board || "FREE"}`}
               className="bg-green-800 text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-green-700 transition-colors"
             >
               글 작성
@@ -319,7 +317,6 @@ export default async function BrandDetailPage({
             })}
           </div>
 
-          {/* 게시글 목록 */}
           <div className="divide-y divide-gray-50">
             {posts.length === 0 ? (
               <div className="text-center py-14 text-gray-400 text-sm">

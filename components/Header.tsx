@@ -56,6 +56,9 @@ export default function Header() {
                       <Link href="/profile" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                         <User size={14} /> 내 프로필
                       </Link>
+                      <Link href="/profile/edit" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        <Settings size={14} /> 프로필 수정
+                      </Link>
                       <Link href="/profile/verify" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                         <Settings size={14} /> 점주 인증
                       </Link>

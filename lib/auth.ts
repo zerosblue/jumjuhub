@@ -57,9 +57,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       }
 
-      // nickname이 없는 로그인 유저는 매번 DB에서 최신값 조회
-      // (닉네임 설정 후 JWT 캐시와 DB가 어긋나는 문제 방지)
-      if (token.id && !token.nickname && !account) {
+      // 매번 DB에서 최신값 조회 (닉네임·사진 수정 후 JWT 캐시와 DB 동기화)
+      if (token.id && !account) {
         try {
           const fresh = await prisma.user.findUnique({
             where: { id: token.id as string },

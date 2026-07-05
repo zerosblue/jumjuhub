@@ -91,7 +91,7 @@ export default async function HomePage() {
             진짜 점주들의 솔직한 이야기
           </h1>
           <p className="text-green-100 text-sm mb-6">
-            가맹비부터 평균매출까지, 창업 전에 꼭 알아야 할 정보
+            평균매출·가맹점 현황, 창업 전에 꼭 알아야 할 정보
           </p>
           <SearchBar placeholder="브랜드명을 검색하세요 (예: BBQ, 메가커피, CU)" size="lg" />
           {lastSync && (

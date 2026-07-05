@@ -7,6 +7,7 @@ import PostCard from "@/components/PostCard";
 import AdSensePlaceholder from "@/components/AdSensePlaceholder";
 import { formatCurrency, formatNumber, formatDate, boardTypeLabel } from "@/lib/utils";
 import { Store, Calendar, FileText, TrendingUp, DollarSign, Info } from "lucide-react";
+import BrandLogo from "@/components/BrandLogo";
 
 const BOARD_TYPES = [
   { type: "NOTICE" },
@@ -153,13 +154,7 @@ export default async function BrandDetailPage({
         {/* ── 브랜드 헤더 ── */}
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
           <div className="flex items-start gap-4">
-            {brand.logoUrl ? (
-              <img src={brand.logoUrl} alt={brand.name} className="w-16 h-16 rounded-xl object-contain border border-gray-100 shrink-0" />
-            ) : (
-              <div className="w-16 h-16 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
-                <Store size={28} className="text-green-600" />
-              </div>
-            )}
+            <BrandLogo name={brand.name} logoUrl={brand.logoUrl} size="lg" />
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap gap-1.5 mb-1">
                 <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-medium">{brand.category}</span>

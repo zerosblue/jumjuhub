@@ -26,20 +26,72 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           null;
 
         try {
-          let dbUser = email
-            ? await prisma.user.findUnique({ where: { email } })
-            : null;
+          // 1) provider + providerAccountId로 기존 계정 조회 (이메일 없는 카카오 대응)
+          const existingAccount = await prisma.account.findUnique({
+            where: {
+              provider_providerAccountId: {
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+              },
+            },
+            include: { user: true },
+          });
+
+          let dbUser = existingAccount?.user ?? null;
+
+          // 2) account 없으면 이메일로 재시도
+          if (!dbUser && email) {
+            dbUser = await prisma.user.findUnique({ where: { email } }) ?? null;
+          }
 
           if (!dbUser) {
+            // 3) 신규 유저 + Account 레코드 생성
             dbUser = await prisma.user.create({
               data: {
                 email: email ?? null,
                 nickname: null,
                 image: image ?? null,
                 provider: account.provider,
+                accounts: {
+                  create: {
+                    type: account.type,
+                    provider: account.provider,
+                    providerAccountId: account.providerAccountId,
+                    access_token: account.access_token,
+                    refresh_token: account.refresh_token,
+                    expires_at: account.expires_at,
+                    token_type: account.token_type,
+                    scope: account.scope,
+                    id_token: account.id_token,
+                  },
+                },
               },
             });
           } else {
+            // 4) 기존 유저 — Account 레코드 없으면 연결, 사진 업데이트
+            if (!existingAccount) {
+              await prisma.account.upsert({
+                where: {
+                  provider_providerAccountId: {
+                    provider: account.provider,
+                    providerAccountId: account.providerAccountId,
+                  },
+                },
+                create: {
+                  userId: dbUser.id,
+                  type: account.type,
+                  provider: account.provider,
+                  providerAccountId: account.providerAccountId,
+                  access_token: account.access_token,
+                  refresh_token: account.refresh_token,
+                  expires_at: account.expires_at,
+                  token_type: account.token_type,
+                  scope: account.scope,
+                  id_token: account.id_token,
+                },
+                update: {},
+              });
+            }
             dbUser = await prisma.user.update({
               where: { id: dbUser.id },
               data: { image: image ?? dbUser.image },

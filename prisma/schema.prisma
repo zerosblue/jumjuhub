@@ -81,6 +81,8 @@ model Brand {
   franchiseFee       BigInt?
   deposit            BigInt?
   interiorCost       BigInt?
+  interiorUnitCost   BigInt?
+  standardArea       Float?
   educationFee       BigInt?
   contractPeriod     Int?
   adFee              Float?

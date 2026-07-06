@@ -130,10 +130,17 @@ export default async function BrandDetailPage({
 
   const posts = await getBrandPosts(brand.id, board);
 
-  const costItems = [
+  const costItems: { label: string; value: bigint | null; sub?: string }[] = [
     { label: "가맹비", value: brand.franchiseFee },
     { label: "보증금", value: brand.deposit },
-    { label: "인테리어", value: brand.interiorCost },
+    {
+      label: "인테리어",
+      value: brand.interiorCost,
+      sub:
+        brand.interiorUnitCost != null
+          ? `평당 ${formatCurrency(brand.interiorUnitCost)}${brand.standardArea ? ` · 기준 ${brand.standardArea}평` : ""}`
+          : undefined,
+    },
     { label: "교육비", value: brand.educationFee },
   ].filter((i) => i.value !== null);
 
@@ -236,7 +243,10 @@ export default async function BrandDetailPage({
               {costItems.map((item) => (
                 <div key={item.label} className="flex justify-between items-center py-2.5 border-b border-gray-200 last:border-0">
                   <span className="text-sm text-gray-600">{item.label}</span>
-                  <span className="text-sm font-bold text-gray-900">{formatCurrency(item.value)}</span>
+                  <span className="text-right">
+                    <span className="text-sm font-bold text-gray-900">{formatCurrency(item.value)}</span>
+                    {item.sub && <span className="block text-xs text-gray-400 mt-0.5">{item.sub}</span>}
+                  </span>
                 </div>
               ))}
               {totalCost > 0 && (

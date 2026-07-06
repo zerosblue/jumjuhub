@@ -255,6 +255,9 @@ export default async function BrandDetailPage({
                   <span className="text-base font-black text-green-800">{formatCurrency(totalCost)}</span>
                 </div>
               )}
+              <p className="text-xs text-gray-400 pt-2">
+                가맹본부에 지급하는 비용 기준이며, 점포 임차 보증금·월세·권리금 등 점포 비용은 별도입니다.
+              </p>
             </div>
           </div>
         )}

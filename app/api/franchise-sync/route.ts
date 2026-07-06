@@ -54,6 +54,14 @@ export async function POST(req: NextRequest) {
     const existingBrands = await prisma.brand.findMany({ select: { slug: true, name: true } });
     const slugSet = new Set(existingBrands.map((b) => b.slug));
     const nameToSlug = new Map(existingBrands.map((b) => [b.name, b.slug]));
+    // "비비큐(BBQ)"처럼 한글(영문) 형태 이름은 괄호 안/밖 이름으로도 매칭되게 별칭 등록 (중복 재생성 방지)
+    for (const b of existingBrands) {
+      const m = b.name.match(/^(.+?)\(([^)]+)\)\s*$/);
+      if (!m) continue;
+      for (const alias of [m[1].trim(), m[2].trim()]) {
+        if (alias && !nameToSlug.has(alias)) nameToSlug.set(alias, b.slug);
+      }
+    }
 
     // 순차적으로 slug 생성 (병렬 처리 시 중복 발생 방지)
     const prepared: Array<{
@@ -108,7 +116,7 @@ export async function POST(req: NextRequest) {
         subcategory: item.indutyMlsfcNm ?? null,
         storeCount: parseInt(item.frcsCnt) || 0,
         newCount: parseInt(item.newFrcsRgsCnt) || 0,
-        closedCount: parseInt(item.ctrtEndCnt) || 0,
+        closedCount: (parseInt(item.ctrtEndCnt) || 0) + (parseInt(item.ctrtCncltnCnt) || 0),
         avgRevenue: item.avrgSlsAmt ? BigInt(Math.round(Number(item.avrgSlsAmt) * 1000)) : null,
       });
     }

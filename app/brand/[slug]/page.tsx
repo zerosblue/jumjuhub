@@ -8,6 +8,7 @@ import AdSensePlaceholder from "@/components/AdSensePlaceholder";
 import { formatCurrency, formatNumber, formatDate, boardTypeLabel } from "@/lib/utils";
 import { Store, Calendar, FileText, TrendingUp, DollarSign, Info, ChevronRight } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
+import BrandNotice from "@/components/BrandNotice";
 
 const BOARD_TYPES = [
   { type: "NOTICE" },
@@ -325,6 +326,8 @@ export default async function BrandDetailPage({
               );
             })}
           </div>
+
+          <BrandNotice brandName={brand.name} />
 
           <div className="divide-y divide-gray-50">
             {posts.length === 0 ? (

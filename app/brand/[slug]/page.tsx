@@ -33,8 +33,13 @@ async function getBrandData(slug: string) {
 }
 
 async function getBrandPosts(brandId: string, boardType?: string) {
+  // 공지 탭에서는 전체 공지(brandId 없음)도 함께 노출
+  const where =
+    boardType === "NOTICE"
+      ? { boardType: "NOTICE" as any, isBlinded: false, OR: [{ brandId }, { brandId: null }] }
+      : { brandId, isBlinded: false, ...(boardType ? { boardType: boardType as any } : {}) };
   return prisma.post.findMany({
-    where: { brandId, isBlinded: false, ...(boardType ? { boardType: boardType as any } : {}) },
+    where,
     orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
     take: 20,
     include: {

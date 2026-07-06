@@ -21,8 +21,19 @@ export const metadata: Metadata = {
     siteName: "점주허브",
     title: "점주허브 - 진짜 점주들의 솔직한 이야기",
     description: "프랜차이즈 가맹점주와 예비창업자를 위한 커뮤니티 플랫폼",
+    images: [
+      {
+        url: "https://jumjuhub.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "점주허브 - 진짜 점주들의 솔직한 이야기",
+      },
+    ],
   },
-  twitter: { card: "summary_large_image" },
+  twitter: {
+    card: "summary_large_image",
+    images: ["https://jumjuhub.com/og-image.png"],
+  },
   manifest: "/manifest.json",
 };
 

@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import PostCard from "@/components/PostCard";
 import AdSensePlaceholder from "@/components/AdSensePlaceholder";
 import { formatCurrency, formatNumber, formatDate, boardTypeLabel } from "@/lib/utils";
-import { Store, Calendar, FileText, TrendingUp, DollarSign, Info, ChevronRight } from "lucide-react";
+import { Store, Calendar, FileText, TrendingUp, DollarSign, ChevronRight } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
 import BrandNotice from "@/components/BrandNotice";
 
@@ -167,12 +167,6 @@ export default async function BrandDetailPage({
                 )}
               </div>
               <h1 className="text-2xl sm:text-3xl font-black">{brand.name}</h1>
-              {brand.dataUpdatedAt && (
-                <p className="text-green-300 text-xs mt-1 flex items-center gap-1">
-                  <Info size={11} />
-                  {new Date(brand.dataUpdatedAt).getFullYear()}년 공정위 정보공개서 기준
-                </p>
-              )}
             </div>
           </div>
 

@@ -7,10 +7,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: {
     template: "%s | 점주허브",
-    default: "점주허브 - 11,000개+ 브랜드, 진짜 점주들의 솔직한 이야기",
+    default: "점주허브 - 진짜 점주들의 솔직한 이야기",
   },
   description:
-    "프랜차이즈 가맹점주와 예비창업자를 위한 커뮤니티. 11,000개+ 브랜드 가맹비, 평균매출, 점주 후기를 확인하세요.",
+    "프랜차이즈 가맹점주와 예비창업자를 위한 커뮤니티. 브랜드 가맹비, 평균매출, 창업비용, 점주 후기를 확인하세요.",
   keywords: ["프랜차이즈", "가맹점", "점주", "창업", "가맹비", "평균매출", "점주허브"],
   authors: [{ name: "점주허브" }],
   creator: "점주허브",
@@ -35,6 +35,9 @@ export const metadata: Metadata = {
     images: ["https://jumjuhub.com/og-image.png"],
   },
   manifest: "/manifest.json",
+  verification: {
+    google: "JhC2WfwMuwTgmf92Y7qlzWycrflGkCe74K4GvNuPYQc",
+  },
 };
 
 export const viewport: Viewport = {

@@ -43,6 +43,13 @@ npm run dev
 ### 공정거래위원회 API
 1. [공공데이터포털](https://www.data.go.kr) → "공정거래위원회 가맹사업정보" 신청
 2. 인증키 → `PUBLIC_DATA_API_KEY`
+3. 상권 분석 기능은 "소상공인시장진흥공단 상가(상권)정보" API도 활용신청 필요 (같은 키 사용)
+
+### 카카오맵 (상권 분석 지도)
+1. [Kakao Developers](https://developers.kakao.com) → 내 애플리케이션 → 앱 추가
+2. 앱 설정 → 플랫폼 → Web에 `http://localhost:3000`, `https://jumjuhub.com` 등록
+3. 제품 설정 → 카카오맵 → 활성화 ON
+4. 앱 키 중 **JavaScript 키** → `NEXT_PUBLIC_KAKAO_MAP_API_KEY`
 
 ### Cloudinary
 1. [cloudinary.com](https://cloudinary.com) 무료 계정 생성

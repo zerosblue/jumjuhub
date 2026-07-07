@@ -9,6 +9,7 @@ import { formatCurrency, formatNumber, formatDate, boardTypeLabel } from "@/lib/
 import { Store, Calendar, FileText, TrendingUp, DollarSign, ChevronRight } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
 import BrandNotice from "@/components/BrandNotice";
+import BrandTabs from "@/components/BrandTabs";
 
 const BOARD_TYPES = [
   { type: "NOTICE" },
@@ -214,6 +215,8 @@ export default async function BrandDetailPage({
           </div>
         </div>
       </section>
+
+      <BrandTabs slug={brand.slug} active="info" />
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-4">
         <AdSensePlaceholder format="horizontal" />

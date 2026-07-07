@@ -83,7 +83,7 @@ const VERIFIED_BENEFITS = [
 ];
 
 export default function VerifyPage() {
-  const { data: session, update } = useSession();
+  const { data: session, status, update } = useSession();
   const router = useRouter();
 
   const verifyLevel = session?.user?.verifyLevel as "NONE" | "SELF" | "VERIFIED" | undefined;
@@ -151,6 +151,7 @@ export default function VerifyPage() {
     setDocLoading(false);
   };
 
+  if (status === "loading") return null;
   if (!session) {
     router.push("/auth/signin");
     return null;

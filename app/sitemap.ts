@@ -27,6 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const { prisma } = await import("@/lib/prisma");
     const brands = await prisma.brand.findMany({
+      where: { isHidden: false },
       select: { slug: true, updatedAt: true },
     });
 

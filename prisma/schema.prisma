@@ -87,6 +87,7 @@ model Brand {
   contractPeriod     Int?
   adFee              Float?
   royaltyFee         Float?
+  isHidden           Boolean   @default(false)
   dataUpdatedAt      DateTime?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt

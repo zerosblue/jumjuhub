@@ -128,7 +128,10 @@ export default async function AdminPage() {
 
           {/* 브랜드 데이터 정리 */}
           <section className="bg-white rounded-2xl border border-gray-100 p-5">
-            <h2 className="font-bold text-gray-900 mb-4">브랜드 데이터 정리</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-bold text-gray-900">브랜드 데이터 정리</h2>
+              <Link href="/admin/brands" className="text-xs text-green-700 hover:underline">숨김 관리 →</Link>
+            </div>
             <BrandToolsButton />
           </section>
 

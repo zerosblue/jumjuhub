@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   const limit = parseInt(searchParams.get("limit") ?? "20");
   const sort = searchParams.get("sort") ?? "popular";
 
-  const where: any = {};
+  const where: any = { isHidden: false };
   if (q) {
     where.OR = [
       { name: { contains: q, mode: "insensitive" } },

@@ -14,7 +14,7 @@ const CATEGORIES = [
 type SortKey = "storeCount" | "avgRevenue" | "name";
 
 async function getBrands(q: string, category: string, page: number, sort: SortKey) {
-  const where: any = { storeCount: { gt: 0 } };
+  const where: any = { storeCount: { gt: 0 }, isHidden: false };
   if (q) {
     where.OR = [
       { name: { contains: q, mode: "insensitive" } },

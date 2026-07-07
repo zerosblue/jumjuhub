@@ -37,6 +37,9 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   verification: {
     google: "JhC2WfwMuwTgmf92Y7qlzWycrflGkCe74K4GvNuPYQc",
+    other: {
+      "naver-site-verification": "df707a1b9ba0a2d6309e055435c7546ad7358ce2",
+    },
   },
 };
 

@@ -57,6 +57,8 @@ export default function TradeAreaAnalysis({ brandSlug, brandName }: { brandSlug:
   const skipSearchRef = useRef(false);
 
   // 카카오맵 SDK 로드
+  const [sdkRetry, setSdkRetry] = useState(0);
+  const [sdkError, setSdkError] = useState(false);
   useEffect(() => {
     const key = process.env.NEXT_PUBLIC_KAKAO_MAP_API_KEY;
     if (!key) {
@@ -67,14 +69,23 @@ export default function TradeAreaAnalysis({ brandSlug, brandName }: { brandSlug:
       setSdkReady(true);
       return;
     }
+    document.querySelector('script[src*="dapi.kakao.com"]')?.remove();
     const script = document.createElement("script");
     script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${key}&autoload=false&libraries=services`;
     script.async = true;
     script.onload = () => window.kakao.maps.load(() => setSdkReady(true));
-    script.onerror = () =>
-      setError("카카오맵을 불러오지 못했습니다. 새로고침 해주세요. 광고차단 프로그램이 지도를 차단하는 경우가 있습니다.");
+    script.onerror = () => {
+      setSdkError(true);
+      setError("카카오맵을 불러오지 못했습니다. 광고차단 프로그램이나 네트워크가 지도를 차단하는 경우가 있습니다.");
+    };
     document.head.appendChild(script);
-  }, []);
+  }, [sdkRetry]);
+
+  const retrySdk = () => {
+    setSdkError(false);
+    setError(null);
+    setSdkRetry((n) => n + 1);
+  };
 
   // 주소 자동완성 (디바운스)
   useEffect(() => {
@@ -291,7 +302,17 @@ export default function TradeAreaAnalysis({ brandSlug, brandName }: { brandSlug:
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-100 text-red-700 text-sm rounded-xl px-4 py-3">{error}</div>
+        <div className="bg-red-50 border border-red-100 text-red-700 text-sm rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+          <span>{error}</span>
+          {sdkError && (
+            <button
+              onClick={retrySdk}
+              className="shrink-0 px-3 py-1.5 bg-red-600 text-white text-xs font-bold rounded-lg hover:bg-red-500"
+            >
+              다시 시도
+            </button>
+          )}
+        </div>
       )}
 
       {/* 지도 */}

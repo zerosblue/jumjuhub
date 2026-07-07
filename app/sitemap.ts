@@ -37,7 +37,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }));
 
-    return [...staticRoutes, ...brandUrls];
+    const tradeAreaUrls: MetadataRoute.Sitemap = brands.map((b) => ({
+      url: `https://jumjuhub.com/brand/${b.slug}/trade-area`,
+      lastModified: b.updatedAt,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    }));
+
+    return [...staticRoutes, ...brandUrls, ...tradeAreaUrls];
   } catch {
     return staticRoutes;
   }

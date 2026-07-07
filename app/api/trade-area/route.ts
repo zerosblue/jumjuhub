@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "브랜드를 찾을 수 없습니다." }, { status: 404 });
   }
 
-  const filter = resolveUpjong(brand.subcategory, brand.category);
+  const filter = resolveUpjong(brand.subcategory, brand.category, brand.name);
   if (!filter) {
     return NextResponse.json(
       { error: `"${brand.subcategory ?? brand.category}" 업종은 아직 상권분석을 지원하지 않습니다.` },
@@ -112,8 +112,14 @@ export async function GET(req: NextRequest) {
     // 경쟁 브랜드 TOP 5: DB의 동일 업종 브랜드명과 상호명 매칭으로 집계
     // (상가정보 상호에는 지점명이 붙어 있어 상호명 단순 그룹핑으로는 브랜드가 안 잡힘)
     const GENERIC = new Set(["치킨", "통닭", "피자", "버거", "카페", "커피", "분식", "김밥", "주점", "호프", "한식", "편의점"]);
+    // 업종이 브랜드명으로 보정된 경우(토스트 등) 경쟁 후보도 같은 키워드로 선정
+    const TOAST_KW = /토스트|샌드위치|샐러드/;
     const dbBrands = await prisma.brand.findMany({
-      where: brand.subcategory ? { subcategory: brand.subcategory } : { category: brand.category },
+      where: TOAST_KW.test(brand.name)
+        ? { OR: [{ name: { contains: "토스트" } }, { name: { contains: "샌드위치" } }, { name: { contains: "샐러드" } }] }
+        : brand.subcategory
+          ? { subcategory: brand.subcategory }
+          : { category: brand.category },
       select: { name: true },
     });
     const brandAliases: Array<{ display: string; aliases: string[] }> = [];

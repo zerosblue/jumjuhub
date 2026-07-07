@@ -71,7 +71,8 @@ export default function TradeAreaAnalysis({ brandSlug, brandName }: { brandSlug:
     script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${key}&autoload=false&libraries=services`;
     script.async = true;
     script.onload = () => window.kakao.maps.load(() => setSdkReady(true));
-    script.onerror = () => setError("카카오맵을 불러오지 못했습니다.");
+    script.onerror = () =>
+      setError("카카오맵을 불러오지 못했습니다. 새로고침 해주세요. 광고차단 프로그램이 지도를 차단하는 경우가 있습니다.");
     document.head.appendChild(script);
   }, []);
 

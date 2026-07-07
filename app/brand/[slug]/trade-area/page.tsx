@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import BrandLogo from "@/components/BrandLogo";
 import BrandTabs from "@/components/BrandTabs";
 import TradeAreaAnalysis from "@/components/TradeAreaAnalysis";
+import { resolveUpjong } from "@/lib/trade-area";
 import { ChevronRight } from "lucide-react";
 
 async function getBrand(slug: string) {
@@ -52,7 +53,9 @@ export default async function TradeAreaPage({ params }: { params: Promise<{ slug
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl font-black">{brand.name} 상권 분석</h1>
-              <p className="text-green-200 text-sm">창업 예정지 주변 {brand.subcategory ?? brand.category} 경쟁 현황을 확인하세요</p>
+              <p className="text-green-200 text-sm">
+                창업 예정지 주변 {resolveUpjong(brand.subcategory, brand.category, brand.name)?.label ?? brand.subcategory ?? brand.category} 경쟁 현황을 확인하세요
+              </p>
             </div>
           </div>
         </div>

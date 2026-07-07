@@ -41,7 +41,11 @@ const KEYWORD_FALLBACK: Array<[RegExp, UpjongFilter]> = [
   [/편의점/, MAP["편의점"]],
 ];
 
-export function resolveUpjong(subcategory: string | null, category: string): UpjongFilter | null {
+export function resolveUpjong(subcategory: string | null, category: string, brandName?: string): UpjongFilter | null {
+  // 공정위 업종이 뭉뚱그려진 경우 브랜드명으로 세분류 보정 (예: 이삭토스트 → 분식이 아닌 토스트)
+  if (brandName && /토스트|샌드위치|샐러드/.test(brandName)) {
+    return { indsSclsCd: "I21005", label: "토스트·샌드위치" };
+  }
   const key = (subcategory ?? "").trim();
   if (key && MAP[key]) return MAP[key];
   for (const [re, f] of KEYWORD_FALLBACK) {

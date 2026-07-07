@@ -109,9 +109,11 @@ export default async function AdminUsersPage({
                       <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
                         u.role === "ADMIN"
                           ? "bg-purple-100 text-purple-700"
+                          : u.role === "BOT"
+                          ? "bg-amber-100 text-amber-700"
                           : "bg-gray-100 text-gray-600"
                       }`}>
-                        {u.role === "ADMIN" ? "관리자" : "일반"}
+                        {u.role === "ADMIN" ? "관리자" : u.role === "BOT" ? "봇" : "일반"}
                       </span>
                     </td>
                     <td className="px-4 py-3">

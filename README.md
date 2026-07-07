@@ -98,6 +98,30 @@ Vercel 환경변수에 `.env` 내용 전체 입력 필요.
 
 ---
 
+## 봇 포스팅 API
+
+외부 자동화 도구(blogAutomation 등)에서 점주허브봇 계정으로 브랜드 게시판에 글을 등록하는 API.
+
+```bash
+curl -X POST https://jumjuhub.com/api/bot/post \
+  -H "Content-Type: application/json" \
+  -H "X-Bot-API-Key: $BOT_API_KEY" \
+  -d '{
+    "brandName": "BBQ",
+    "title": "BBQ 창업비용과 평균 매출 현실",
+    "content": "글 내용...",
+    "boardType": "FREE"
+  }'
+```
+
+- `brandName`: 브랜드명 또는 slug — DB에서 자동 매칭 (없으면 404)
+- `boardType`: 생략 시 `FREE` (`QNA`, `REVIEW`, `REVENUE` 등 가능)
+- 응답: `{ "success": true, "postId": "...", "brandSlug": "bbq", "url": "https://jumjuhub.com/brand/bbq" }`
+- 모든 글 하단에 봇 자동 생성 안내문구가 붙음
+- 인증 실패 401, 분당 10회 초과 시 429
+
+---
+
 ## 관리자 계정 설정
 
 ```sql

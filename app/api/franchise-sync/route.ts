@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { toBrandSlug } from "@/lib/utils";
+import { requestIndexing, indexingConfigured, brandPageUrl } from "@/lib/google-indexing";
 
 const KEY = process.env.PUBLIC_DATA_API_KEY!;
 
@@ -123,6 +124,7 @@ export async function POST(req: NextRequest) {
 
     let created = 0;
     let updated = 0;
+    const createdSlugs: string[] = [];
 
     // 100개씩 병렬 upsert (slug는 이미 고유함)
     const BATCH = 100;
@@ -148,12 +150,33 @@ export async function POST(req: NextRequest) {
           // upsert가 create였는지 update였는지 판별
           const wasExisting = existingBrands.some((b) => b.slug === item.slug);
           if (wasExisting) updated++;
-          else created++;
+          else {
+            created++;
+            createdSlugs.push(item.slug);
+          }
         })
       );
     }
 
-    return NextResponse.json({ ok: true, created, updated, total: prepared.length, yr });
+    // 신규 생성된 브랜드 페이지 구글 색인 즉시 요청 (일일 할당량 보호를 위해 10개까지, 나머지는 크론이 처리)
+    let indexed = 0;
+    if (createdSlugs.length > 0 && indexingConfigured()) {
+      try {
+        const result = await requestIndexing(createdSlugs.slice(0, 10).map(brandPageUrl));
+        if (result.ok.length > 0) {
+          const okSlugs = result.ok.map((u) => decodeURIComponent(u.split("/brand/")[1]));
+          await prisma.brand.updateMany({
+            where: { slug: { in: okSlugs } },
+            data: { indexRequestedAt: new Date() },
+          });
+          indexed = result.ok.length;
+        }
+      } catch (e) {
+        console.error("[franchise-sync] 색인 요청 실패:", e);
+      }
+    }
+
+    return NextResponse.json({ ok: true, created, updated, total: prepared.length, yr, indexed });
   } catch (err: any) {
     console.error("[franchise-sync] 오류:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });

@@ -90,6 +90,7 @@ model Brand {
   royaltyFee         Float?
   isHidden           Boolean   @default(false)
   dataUpdatedAt      DateTime?
+  indexRequestedAt   DateTime?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 

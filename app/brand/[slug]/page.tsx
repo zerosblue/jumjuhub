@@ -8,6 +8,7 @@ import AdSensePlaceholder from "@/components/AdSensePlaceholder";
 import { formatCurrency, formatNumber, formatDate, boardTypeLabel } from "@/lib/utils";
 import { Store, Calendar, FileText, TrendingUp, DollarSign, ChevronRight } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
+import { brandSeoTitle, brandSeoDescription, brandFaqItems, brandJsonLd } from "@/lib/brand-seo";
 import BrandNotice from "@/components/BrandNotice";
 import BrandTabs from "@/components/BrandTabs";
 
@@ -56,13 +57,28 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const slug = decodeURIComponent(rawSlug);
   const brand = await prisma.brand.findUnique({
     where: { slug },
-    select: { name: true, category: true, avgRevenue: true, franchiseFee: true },
+    select: {
+      name: true,
+      slug: true,
+      storeCount: true,
+      avgRevenue: true,
+      franchiseFee: true,
+      deposit: true,
+      interiorCost: true,
+      educationFee: true,
+    },
   });
   if (!brand) return {};
 
+  const title = brandSeoTitle(brand);
+  const description = brandSeoDescription(brand);
+  const url = `https://jumjuhub.com/brand/${encodeURIComponent(brand.slug)}`;
+
   return {
-    title: `${brand.name} 점주 후기 · 창업정보`,
-    description: `${brand.name} 실제 가맹점주 후기, 평균 매출 ${brand.avgRevenue ? formatCurrency(brand.avgRevenue) : "정보없음"}, 가맹비 ${brand.franchiseFee ? formatCurrency(brand.franchiseFee) : "정보없음"}. 진짜 점주들의 솔직한 이야기.`,
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { title: `${title} | 점주허브`, description, url },
   };
 }
 
@@ -148,8 +164,15 @@ export default async function BrandDetailPage({
   const totalCost = costItems.reduce((acc, i) => acc + Number(i.value ?? 0), 0);
   const latestHistory = brand.storeHistory[brand.storeHistory.length - 1];
 
+  const faqItems = brandFaqItems(brand);
+  const jsonLd = brandJsonLd(brand);
+
   return (
     <div className="min-h-screen bg-gray-50">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+      />
       <Header />
 
       {/* 브랜드 히어로 배너 */}
@@ -370,6 +393,27 @@ export default async function BrandDetailPage({
             </div>
           )}
         </div>
+
+        {/* ── 자주 묻는 질문 (FAQ) ── */}
+        {faqItems.length > 0 && (
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+            <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <span className="w-1 h-4 bg-green-800 rounded-full inline-block" />
+              {brand.name} 자주 묻는 질문
+            </h2>
+            <div className="space-y-4">
+              {faqItems.map((item) => (
+                <div key={item.q} className="border-b border-gray-100 last:border-0 pb-4 last:pb-0">
+                  <h3 className="text-sm font-bold text-gray-900 mb-1.5">Q. {item.q}</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">A. {item.a}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-gray-400 mt-4">
+              공정거래위원회 가맹사업 정보공개서 등록 데이터 기준이며, 실제 조건은 가맹본부와의 상담 시 달라질 수 있습니다.
+            </p>
+          </div>
+        )}
 
         <AdSensePlaceholder format="horizontal" />
       </main>

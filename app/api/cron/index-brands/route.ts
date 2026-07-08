@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { requestIndexing, indexingConfigured, brandPageUrl } from "@/lib/google-indexing";
+import { sendAdminEmail } from "@/lib/email";
 
 export const maxDuration = 300;
 
@@ -53,12 +54,29 @@ export async function GET(req: NextRequest) {
     });
   }
 
+  const remaining = Math.max(0, brands.filter((b) => b.indexRequestedAt === null).length - result.ok.length);
+  const emailSent = await sendAdminEmail(
+    `[점주허브] 구글 색인 요청 완료 — 성공 ${result.ok.length}건`,
+    [
+      `구글 색인 자동 요청 결과 (${new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 16).replace("T", " ")} KST)`,
+      ``,
+      `성공: ${result.ok.length}건`,
+      `실패: ${result.failed.length}건${result.quotaExceeded ? " (일일 할당량 초과 포함)" : ""}`,
+      `남은 미요청 브랜드: ${remaining}개`,
+      ``,
+      ...(result.failed.length > 0
+        ? ["실패 상세 (최대 5건):", ...result.failed.slice(0, 5).map((f) => `- ${f.url}: ${f.error}`)]
+        : []),
+    ].join("\n")
+  );
+
   return NextResponse.json({
     ok: true,
     requested: result.ok.length,
     failed: result.failed.length,
     quotaExceeded: result.quotaExceeded,
-    remaining: Math.max(0, brands.filter((b) => b.indexRequestedAt === null).length - result.ok.length),
+    remaining,
+    emailSent,
     errors: result.failed.slice(0, 5),
   });
 }

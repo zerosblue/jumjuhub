@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { SessionProvider } from "next-auth/react";
 import NicknameGuard from "@/components/NicknameGuard";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import VisitTracker from "@/components/VisitTracker";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -64,6 +65,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SessionProvider>
           <NicknameGuard />
           <ServiceWorkerRegister />
+          <VisitTracker />
           {children}
         </SessionProvider>
       </body>

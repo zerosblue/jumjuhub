@@ -276,3 +276,12 @@ enum NotificationType {
   VERIFY_REJECTED
   SYSTEM
 }
+
+model DailyVisitor {
+  id        String   @id @default(cuid())
+  date      DateTime @db.Date
+  visitorId String
+  createdAt DateTime @default(now())
+
+  @@unique([date, visitorId])
+}

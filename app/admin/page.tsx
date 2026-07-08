@@ -37,7 +37,24 @@ async function getAdminStats() {
     select: { id: true, title: true, reportCount: true, createdAt: true },
   });
 
-  return { userCount, postCount, pendingReports, pendingVerifications, brandCount, recentUsers, pendingVerifs, reportedPosts };
+  // 최근 14일 방문자 (KST 기준, 관리자·봇 제외 집계)
+  const kstNow = new Date(Date.now() + 9 * 3600 * 1000);
+  const kstToday = new Date(Date.UTC(kstNow.getUTCFullYear(), kstNow.getUTCMonth(), kstNow.getUTCDate()));
+  const since = new Date(kstToday.getTime() - 13 * 24 * 3600 * 1000);
+  const visitorRows = await prisma.dailyVisitor.groupBy({
+    by: ["date"],
+    where: { date: { gte: since } },
+    _count: { _all: true },
+    orderBy: { date: "desc" },
+  });
+  const dailyVisitors = visitorRows.map((r) => ({
+    date: r.date.toISOString().slice(0, 10),
+    count: r._count._all,
+  }));
+  const todayVisitors =
+    dailyVisitors.find((d) => d.date === kstToday.toISOString().slice(0, 10))?.count ?? 0;
+
+  return { userCount, postCount, pendingReports, pendingVerifications, brandCount, recentUsers, pendingVerifs, reportedPosts, dailyVisitors, todayVisitors };
 }
 
 export default async function AdminPage() {
@@ -53,8 +70,9 @@ export default async function AdminPage() {
         <h1 className="text-2xl font-black text-gray-900 mb-6">관리자 대시보드</h1>
 
         {/* 통계 */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-6 gap-4 mb-8">
           {[
+            { label: "오늘 방문자", value: stats.todayVisitors.toLocaleString(), color: "teal" },
             { label: "전체 회원", value: stats.userCount.toLocaleString(), color: "blue" },
             { label: "전체 게시글", value: stats.postCount.toLocaleString(), color: "green" },
             { label: "브랜드 수", value: stats.brandCount.toLocaleString(), color: "purple" },
@@ -133,6 +151,33 @@ export default async function AdminPage() {
               <Link href="/admin/brands" className="text-xs text-green-700 hover:underline">숨김 관리 →</Link>
             </div>
             <BrandToolsButton />
+          </section>
+
+          {/* 방문자 통계 */}
+          <section className="bg-white rounded-2xl border border-gray-100 p-5">
+            <h2 className="font-bold text-gray-900 mb-1">방문자 통계 (최근 14일)</h2>
+            <p className="text-xs text-gray-400 mb-4">관리자·봇 방문 제외, 일별 순 방문자 수 (KST)</p>
+            {stats.dailyVisitors.length === 0 ? (
+              <p className="text-sm text-gray-400">아직 집계된 방문 기록이 없습니다.</p>
+            ) : (
+              <div className="space-y-1.5">
+                {stats.dailyVisitors.map((d: any) => {
+                  const max = Math.max(...stats.dailyVisitors.map((x: any) => x.count));
+                  return (
+                    <div key={d.date} className="flex items-center gap-2 text-sm">
+                      <span className="w-20 shrink-0 text-xs text-gray-500">{d.date.slice(5)}</span>
+                      <div className="flex-1 bg-gray-100 rounded h-4 overflow-hidden">
+                        <div
+                          className="bg-green-600 h-full rounded"
+                          style={{ width: `${Math.max(4, (d.count / max) * 100)}%` }}
+                        />
+                      </div>
+                      <span className="w-10 shrink-0 text-right font-medium text-gray-800">{d.count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </section>
 
           {/* 최근 가입자 */}

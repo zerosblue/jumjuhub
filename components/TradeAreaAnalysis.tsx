@@ -73,12 +73,30 @@ export default function TradeAreaAnalysis({ brandSlug, brandName }: { brandSlug:
     const script = document.createElement("script");
     script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${key}&autoload=false&libraries=services`;
     script.async = true;
-    script.onload = () => window.kakao.maps.load(() => setSdkReady(true));
-    script.onerror = () => {
+    const timer = setTimeout(() => {
       setSdkError(true);
-      setError("카카오맵을 불러오지 못했습니다. 광고차단 프로그램이나 네트워크가 지도를 차단하는 경우가 있습니다.");
+      setError(
+        `카카오맵 로딩이 지연되고 있습니다 (현재 도메인: ${window.location.host}). ` +
+          "광고차단 프로그램이 dapi.kakao.com을 차단 중이거나, 카카오 개발자 콘솔에 이 도메인이 등록되지 않은 경우입니다."
+      );
+    }, 10000);
+    script.onload = () =>
+      window.kakao.maps.load(() => {
+        clearTimeout(timer);
+        setSdkError(false);
+        setError(null);
+        setSdkReady(true);
+      });
+    script.onerror = () => {
+      clearTimeout(timer);
+      setSdkError(true);
+      setError(
+        `카카오맵을 불러오지 못했습니다 (현재 도메인: ${window.location.host}). ` +
+          "카카오 개발자 콘솔의 플랫폼 도메인 등록을 확인하거나, 광고차단 프로그램을 잠시 꺼주세요."
+      );
     };
     document.head.appendChild(script);
+    return () => clearTimeout(timer);
   }, [sdkRetry]);
 
   const retrySdk = () => {

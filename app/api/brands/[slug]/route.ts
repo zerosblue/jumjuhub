@@ -25,6 +25,7 @@ export async function GET(
     franchiseFee: brand.franchiseFee?.toString(),
     deposit: brand.deposit?.toString(),
     interiorCost: brand.interiorCost?.toString(),
+    interiorUnitCost: brand.interiorUnitCost?.toString(),
     educationFee: brand.educationFee?.toString(),
   });
 }

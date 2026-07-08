@@ -209,7 +209,15 @@ export default function TradeAreaAnalysis({ brandSlug, brandName }: { brandSlug:
   };
 
   const submitSearch = () => {
-    if (!sdkReady || !query.trim()) return;
+    if (!query.trim()) {
+      setError("창업 예정지 주소를 입력해주세요.");
+      return;
+    }
+    if (!sdkReady) {
+      setError("지도를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+    setError(null);
     const geocoder = new window.kakao.maps.services.Geocoder();
     geocoder.addressSearch(query, (data: any[], status: string) => {
       if (status === window.kakao.maps.services.Status.OK && data[0]) {
@@ -218,11 +226,24 @@ export default function TradeAreaAnalysis({ brandSlug, brandName }: { brandSlug:
         const label = data[0].road_address?.address_name || data[0].address_name;
         setCenter({ lon, lat, label });
         runAnalysis(lon, lat, radius, label);
-      } else if (suggestions[0]) {
-        selectSuggestion(suggestions[0]);
-      } else {
-        setError("주소를 찾지 못했습니다. 다시 입력해주세요.");
+        return;
       }
+      // 주소가 아닌 장소명(예: 강남역)이거나 자동완성이 아직 안 뜬 경우 — 키워드 검색으로 폴백
+      const places = new window.kakao.maps.services.Places();
+      places.keywordSearch(query, (pdata: any[], pstatus: string) => {
+        if (pstatus === window.kakao.maps.services.Status.OK && pdata[0]) {
+          selectSuggestion({
+            place: pdata[0].place_name,
+            addr: pdata[0].road_address_name || pdata[0].address_name,
+            x: pdata[0].x,
+            y: pdata[0].y,
+          });
+        } else if (suggestions[0]) {
+          selectSuggestion(suggestions[0]);
+        } else {
+          setError("주소를 찾지 못했습니다. 다시 입력해주세요.");
+        }
+      });
     });
   };
 
@@ -259,10 +280,10 @@ export default function TradeAreaAnalysis({ brandSlug, brandName }: { brandSlug:
             </div>
             <button
               onClick={submitSearch}
-              disabled={!sdkReady || loading}
+              disabled={loading}
               className="px-4 py-2.5 bg-green-800 text-white text-sm font-bold rounded-xl hover:bg-green-700 disabled:opacity-50 shrink-0"
             >
-              분석
+              {sdkReady ? "분석" : "로딩중"}
             </button>
           </div>
           {showSuggestions && suggestions.length > 0 && (

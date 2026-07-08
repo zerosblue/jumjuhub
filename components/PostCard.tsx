@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { formatRelativeTime, boardTypeLabel } from "@/lib/utils";
-import { Eye, MessageSquare, Shield } from "lucide-react";
+import { Eye, Heart, MessageSquare, Shield } from "lucide-react";
 
 interface PostCardProps {
   post: {
@@ -54,6 +54,9 @@ export default function PostCard({ post }: PostCardProps) {
         <span>{formatRelativeTime(post.createdAt)}</span>
         <span className="flex items-center gap-0.5">
           <Eye size={11} /> {post.viewCount}
+        </span>
+        <span className="flex items-center gap-0.5">
+          <Heart size={11} /> {post.likeCount}
         </span>
         <span className="flex items-center gap-0.5">
           <MessageSquare size={11} /> {post._count.comments}

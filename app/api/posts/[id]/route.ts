@@ -33,8 +33,6 @@ export async function GET(
     return NextResponse.json({ error: "게시글을 찾을 수 없습니다." }, { status: 404 });
   }
 
-  await prisma.post.update({ where: { id }, data: { viewCount: { increment: 1 } } });
-
   return NextResponse.json({
     ...post,
     author: post.isAnonymous ? null : post.author,

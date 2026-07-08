@@ -28,6 +28,7 @@ model User {
   verifications Verification[]
   notifications Notification[]
   brandSubs     BrandSubscription[]
+  postLikes     PostLike[]
 }
 
 model Account {
@@ -141,10 +142,23 @@ model Post {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  brand    Brand?    @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  author   User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  brand    Brand?     @relation(fields: [brandId], references: [id], onDelete: SetNull)
   comments Comment[]
   reports  Report[]
+  likes    PostLike[]
+}
+
+model PostLike {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
 }
 
 model Comment {

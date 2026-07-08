@@ -95,7 +95,16 @@ export default async function PostDetailPage({
   }
 
   // viewCount 증가 — 실패해도 페이지 렌더링은 계속
-  prisma.post.update({ where: { id }, data: { viewCount: { increment: 1 } } }).catch(() => {});
+  try {
+    await prisma.post.update({ where: { id }, data: { viewCount: { increment: 1 } } });
+  } catch {}
+
+  const liked = session?.user?.id
+    ? !!(await prisma.postLike.findUnique({
+        where: { postId_userId: { postId: id, userId: session.user.id } },
+        select: { id: true },
+      }))
+    : false;
 
   const board = boardTypeLabel(post.boardType);
   const displayAuthor = post.isAnonymous ? null : post.author;
@@ -213,7 +222,7 @@ export default async function PostDetailPage({
 
           {/* 좋아요 */}
           <div className="flex justify-center mt-8 pt-6 border-t border-gray-100">
-            <LikeButton postId={post.id} initialCount={post.likeCount} />
+            <LikeButton postId={post.id} initialCount={post.likeCount} initialLiked={liked} />
           </div>
         </article>
 

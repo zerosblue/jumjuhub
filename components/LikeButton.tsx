@@ -4,10 +4,18 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { Heart } from "lucide-react";
 
-export default function LikeButton({ postId, initialCount }: { postId: string; initialCount: number }) {
+export default function LikeButton({
+  postId,
+  initialCount,
+  initialLiked = false,
+}: {
+  postId: string;
+  initialCount: number;
+  initialLiked?: boolean;
+}) {
   const { data: session } = useSession();
   const [count, setCount] = useState(initialCount);
-  const [liked, setLiked] = useState(false);
+  const [liked, setLiked] = useState(initialLiked);
   const [loading, setLoading] = useState(false);
 
   const handleLike = async () => {
@@ -15,14 +23,14 @@ export default function LikeButton({ postId, initialCount }: { postId: string; i
       alert("로그인 후 좋아요를 누를 수 있습니다.");
       return;
     }
-    if (liked || loading) return;
+    if (loading) return;
     setLoading(true);
     try {
       const res = await fetch(`/api/posts/${postId}/like`, { method: "POST" });
       if (res.ok) {
         const data = await res.json();
         setCount(data.likeCount);
-        setLiked(true);
+        setLiked(data.liked);
       }
     } catch {}
     setLoading(false);
@@ -31,7 +39,7 @@ export default function LikeButton({ postId, initialCount }: { postId: string; i
   return (
     <button
       onClick={handleLike}
-      disabled={liked || loading}
+      disabled={loading}
       className={`flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-medium transition-all ${
         liked
           ? "bg-red-50 border-red-200 text-red-500"

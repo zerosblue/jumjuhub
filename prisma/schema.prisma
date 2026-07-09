@@ -282,6 +282,7 @@ model DailyVisitor {
   id        String   @id @default(cuid())
   date      DateTime @db.Date
   visitorId String
+  referrer  String?
   createdAt DateTime @default(now())
 
   @@unique([date, visitorId])

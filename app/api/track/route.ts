@@ -39,11 +39,21 @@ export async function POST(req: NextRequest) {
     return res;
   }
 
+  // 유입 경로: 외부 리퍼러의 호스트명만 저장 (자체 도메인·무효값은 직접 방문 취급)
+  let referrer: string | null = null;
+  try {
+    const body = await req.json();
+    const host = new URL(body.ref).hostname.toLowerCase();
+    if (host && !host.endsWith("jumjuhub.com") && !host.endsWith(".vercel.app")) {
+      referrer = host.slice(0, 100);
+    }
+  } catch {}
+
   try {
     await prisma.dailyVisitor.upsert({
       where: { date_visitorId: { date: kstToday(), visitorId } },
       update: {},
-      create: { date: kstToday(), visitorId },
+      create: { date: kstToday(), visitorId, referrer },
     });
   } catch {}
 

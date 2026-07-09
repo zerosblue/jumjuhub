@@ -54,7 +54,31 @@ async function getAdminStats() {
   const todayVisitors =
     dailyVisitors.find((d) => d.date === kstToday.toISOString().slice(0, 10))?.count ?? 0;
 
-  return { userCount, postCount, pendingReports, pendingVerifications, brandCount, recentUsers, pendingVerifs, reportedPosts, dailyVisitors, todayVisitors };
+  const refRows = await prisma.dailyVisitor.findMany({
+    where: { date: { gte: since } },
+    select: { referrer: true },
+  });
+  const sourceOf = (r: string | null): string => {
+    if (!r) return "직접 방문·미수집";
+    if (r.includes("google.")) return "구글 검색";
+    if (r.includes("search.naver")) return "네이버 검색";
+    if (r.includes("blog.naver")) return "네이버 블로그";
+    if (r.includes("tistory")) return "티스토리";
+    if (r.includes("naver.com")) return "네이버 기타";
+    if (r.includes("daum.net")) return "다음";
+    if (r.includes("instagram")) return "인스타그램";
+    return r;
+  };
+  const sourceMap = new Map<string, number>();
+  for (const row of refRows) {
+    const s = sourceOf(row.referrer);
+    sourceMap.set(s, (sourceMap.get(s) ?? 0) + 1);
+  }
+  const trafficSources = [...sourceMap.entries()]
+    .map(([source, count]) => ({ source, count }))
+    .sort((a, b) => b.count - a.count);
+
+  return { userCount, postCount, pendingReports, pendingVerifications, brandCount, recentUsers, pendingVerifs, reportedPosts, dailyVisitors, todayVisitors, trafficSources };
 }
 
 export default async function AdminPage() {
@@ -176,6 +200,20 @@ export default async function AdminPage() {
                     </div>
                   );
                 })}
+              </div>
+            )}
+
+            {stats.trafficSources.length > 0 && (
+              <div className="mt-5 pt-4 border-t border-gray-100">
+                <p className="text-xs font-bold text-gray-700 mb-2">유입 경로 (최근 14일)</p>
+                <div className="space-y-1">
+                  {stats.trafficSources.map((s: any) => (
+                    <div key={s.source} className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">{s.source}</span>
+                      <span className="font-medium text-gray-800">{s.count}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </section>

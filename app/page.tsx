@@ -36,6 +36,7 @@ async function getHomeData() {
           franchiseFee: true,
           deposit: true,
           dataUpdatedAt: true,
+          logoUrl: true,
           _count: { select: { posts: true } },
         },
       }),

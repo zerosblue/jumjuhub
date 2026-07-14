@@ -1,0 +1,25 @@
+name: 구글 색인 요청 (매일 오전 9시 KST)
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # UTC 00:00 = KST 09:00
+  workflow_dispatch: # 수동 실행 가능
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 구글 색인 요청
+        run: |
+          response=$(curl -s -w "\n%{http_code}" \
+            -X GET "https://jumjuhub.com/api/cron/index-brands" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          body=$(echo "$response" | head -n -1)
+          status=$(echo "$response" | tail -n 1)
+          echo "HTTP Status: $status"
+          echo "Response: $body"
+          if [ "$status" != "200" ]; then
+            echo "❌ 색인 요청 실패 (HTTP $status)"
+            exit 1
+          fi
+          echo "✅ 색인 요청 완료"
